@@ -71,17 +71,15 @@ async function inspectContainer() {
         console.log(status.error.message)
         return exit(0)
     }
-    if (!status.isError) {
-        console.log(chalk.blue(`${name}:`))
-        console.log(status.value)
-        const data = await docker.command(`inspect ${name}`)
-        // console.log(data.object[0].State)
-        console.log(chalk.blue('Container Mounts:'))
-        console.log(data.object[0].Mounts)
-        console.log(chalk.blue('Network:'))
-        console.log(data.object[0].NetworkSettings.Ports)
-        exit()
-    }
+    console.log(chalk.blue(`${name}:`))
+    console.log(status.value)
+    const data = await docker.command(`inspect ${name}`)
+    // console.log(data.object[0].State)
+    console.log(chalk.blue('Container Mounts:'))
+    console.log(data.object[0].Mounts)
+    console.log(chalk.blue('Network:'))
+    console.log(data.object[0].NetworkSettings.Ports)
+    exit()
 }
 
 function listContainers() {
