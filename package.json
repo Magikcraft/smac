@@ -1,9 +1,9 @@
 {
     "name": "scriptcraft-sma",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Scriptcraft SMA Server controller",
     "main": "index.js",
-    "bin": "./bin/scriptcraft-sma",
+    "bin": "./bin/sma",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -25,7 +25,7 @@
     "homepage": "https://github.com/Magikcraft/scriptcraft-sma#readme",
     "husky": {
         "hooks": {
-            "pre-commit": "tsc && cp bin/scriptcraft-sma.js bin/scriptcraft-sma && lint-staged"
+            "pre-commit": "tsc && cp bin/scriptcraft-sma.js bin/sma && lint-staged"
         }
     },
     "lint-staged": {
