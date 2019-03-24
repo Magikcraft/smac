@@ -32,7 +32,7 @@ processCommand(command)
 function printHelp() {
     console.log(`Version ${version}`)
     console.log('\nUsage:')
-    console.log('scriptcraft-sma <command>')
+    console.log('sma <command>')
     console.log('\nAvailable commands:')
 
     const commandList = Object.keys(commands).map(c => ({
