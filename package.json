@@ -1,0 +1,53 @@
+{
+    "name": "scriptcraft-sma",
+    "version": "0.0.1",
+    "description": "Scriptcraft SMA Server controller",
+    "main": "index.js",
+    "bin": "./bin/scriptcraft-sma",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Magikcraft/scriptcraft-sma.git"
+    },
+    "keywords": [
+        "scriptcraft",
+        "minecraft",
+        "scriptcraft-sma",
+        "magikcraft"
+    ],
+    "author": "Magikcraft.io",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Magikcraft/scriptcraft-sma/issues"
+    },
+    "homepage": "https://github.com/Magikcraft/scriptcraft-sma#readme",
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{ts,js,json,css,md}": [
+            "prettier --write",
+            "tsc",
+            "mv ./bin/scriptcraft-sma.j ./bin/scriptcraft-sma",
+            "git add"
+        ]
+    },
+    "devDependencies": {
+        "husky": "^1.3.1",
+        "prettierrc": "0.0.0-5"
+    },
+    "dependencies": {
+        "@types/fs-extra": "^5.0.5",
+        "chalk": "^2.4.2",
+        "columnify": "^1.5.4",
+        "docker-cli-js": "^2.5.2",
+        "fs-extra": "^7.0.1",
+        "ghetto-monad": "^2.1.2",
+        "spawn-npm-install": "^1.2.0",
+        "update-check": "^1.5.3"
+    }
+}
