@@ -290,7 +290,7 @@ function restartPausedContainer(name) {
 // }
 function startNewInstance(name) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, port, bind, dc, e_2;
+        var tag, port, bind, cache, dc, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, server_1.getDockerTag()];
@@ -302,10 +302,11 @@ function startNewInstance(name) {
                     return [4 /*yield*/, getBindings(name)];
                 case 3:
                     bind = _a.sent();
+                    cache = "--mount source=sma-server-cache,target=/server/cache";
                     _a.label = 4;
                 case 4:
                     _a.trys.push([4, 6, , 7]);
-                    dc = "run -d -p " + port + ":25565 --name " + name + " " + bind + " --restart always magikcraft/scriptcraft:" + tag;
+                    dc = "run -d -p " + port + ":25565 --name " + name + " " + bind + " " + cache + " --restart always magikcraft/scriptcraft:" + tag;
                     return [4 /*yield*/, docker_1.docker.command(dc)];
                 case 5:
                     _a.sent();

@@ -1,6 +1,6 @@
 {
     "name": "scriptcraft-sma",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "Scriptcraft SMA Server controller",
     "main": "index.js",
     "bin": "./bin/sma",
