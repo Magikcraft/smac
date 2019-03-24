@@ -1,4 +1,4 @@
-import fs from 'fs-extra'
+import * as fs from 'fs-extra'
 import { Maybe, Nothing, Result } from 'ghetto-monad'
 import * as path from 'path'
 

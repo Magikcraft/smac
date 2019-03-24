@@ -1,4 +1,4 @@
-import fs from 'fs-extra'
+import * as fs from 'fs-extra'
 import { Nothing, Result } from 'ghetto-monad'
 import { worldsPath } from './paths'
 

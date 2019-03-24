@@ -71,15 +71,17 @@ async function inspectContainer() {
         console.log(status.error.message)
         return exit(0)
     }
-    console.log(chalk.blue(`${name}:`))
-    console.log(status.value)
-    const data = await docker.command(`inspect ${name}`)
-    // console.log(data.object[0].State)
-    console.log(chalk.blue('Container Mounts:'))
-    console.log(data.object[0].Mounts)
-    console.log(chalk.blue('Network:'))
-    console.log(data.object[0].NetworkSettings.Ports)
-    exit()
+    if (!status.isError) {
+        console.log(chalk.blue(`${name}:`))
+        console.log(status.value)
+        const data = await docker.command(`inspect ${name}`)
+        // console.log(data.object[0].State)
+        console.log(chalk.blue('Container Mounts:'))
+        console.log(data.object[0].Mounts)
+        console.log(chalk.blue('Network:'))
+        console.log(data.object[0].NetworkSettings.Ports)
+        exit()
+    }
 }
 
 function listContainers() {
@@ -193,7 +195,7 @@ async function startNewInstance(name) {
         await docker.command(
             `run -d -p ${port}:25565 --name ${name} ${worlds} ${plugins} --restart always magikcraft/scriptcraft:${tag}`
         )
-        console.log(`SMA Server ${name} started on localhost:${port}`)
+        console.log(`Server ${name} started on localhost:${port}`)
     } catch (e) {
         console.log('There was an error starting the server!')
         console.log(e)
