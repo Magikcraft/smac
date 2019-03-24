@@ -341,7 +341,7 @@ function getBindings(name) {
                     bindings = (_a.sent())
                         .map(function (_a) {
                         var src = _a.src, dst = _a.dst;
-                        return mount(src, dst);
+                        return mount(paths_1.localPath(src), dst);
                     })
                         .join(' ');
                     return [2 /*return*/, worlds + " " + plugins + " " + bindings];

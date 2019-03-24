@@ -5,7 +5,7 @@ import columnify from 'columnify'
 import { ErrorResult, Result } from 'ghetto-monad'
 import { commands } from '../lib/commands'
 import { docker, isDockerInstalled } from '../lib/docker'
-import { pluginsPath, worldsPath } from '../lib/paths'
+import { localPath, pluginsPath, worldsPath } from '../lib/paths'
 import {
     getCustomBindings,
     getDockerTag,
@@ -223,7 +223,7 @@ async function getBindings(name) {
     const worlds = (await hasWorlds()) ? mount(worldsPath(), 'worlds') : ``
     const plugins = mount(pluginsPath(), 'scriptcraft-plugins')
     const bindings = (await getCustomBindings())
-        .map(({ src, dst }) => mount(src, dst))
+        .map(({ src, dst }) => mount(localPath(src), dst))
         .join(' ')
     return `${worlds} ${plugins} ${bindings}`
 }
