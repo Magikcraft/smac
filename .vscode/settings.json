@@ -3,5 +3,12 @@
         "activityBar.background": "#053521",
         "titleBar.activeBackground": "#074A2E",
         "titleBar.activeForeground": "#EFFEF8"
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "files.exclude": {
+        "**/*.js": { "when": "$(basename).ts" }
     }
 }

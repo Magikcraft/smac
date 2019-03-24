@@ -201,8 +201,9 @@ async function startNewInstance(name) {
     const tag = await getDockerTag()
     const port = await getPort()
     const bind = await getBindings(name)
+    const cache = `--mount source=sma-server-cache,target=/server/cache`
     try {
-        const dc = `run -d -p ${port}:25565 --name ${name} ${bind} --restart always magikcraft/scriptcraft:${tag}`
+        const dc = `run -d -p ${port}:25565 --name ${name} ${bind} ${cache} --restart always magikcraft/scriptcraft:${tag}`
         await docker.command(dc)
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)
