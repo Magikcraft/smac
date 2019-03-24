@@ -25,14 +25,14 @@
     "homepage": "https://github.com/Magikcraft/scriptcraft-sma#readme",
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged"
+            "pre-commit": "lint-staged && rename-bin"
         }
     },
     "lint-staged": {
         "*.{ts,js,json,css,md}": [
             "prettier --write",
             "tsc",
-            "mv ./bin/scriptcraft-sma.js ./bin/scriptcraft-sma",
+            "cp bin/scriptcraft-sma.js bin/scriptcraft-sma",
             "git add"
         ]
     },
