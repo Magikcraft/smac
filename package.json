@@ -1,6 +1,6 @@
 {
     "name": "scriptcraft-sma",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Scriptcraft SMA Server controller",
     "main": "index.js",
     "bin": "./bin/scriptcraft-sma",
@@ -32,7 +32,7 @@
         "*.{ts,js,json,css,md}": [
             "prettier --write",
             "tsc",
-            "mv ./bin/scriptcraft-sma.j ./bin/scriptcraft-sma",
+            "mv ./bin/scriptcraft-sma.js ./bin/scriptcraft-sma",
             "git add"
         ]
     },
