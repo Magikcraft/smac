@@ -6,7 +6,12 @@ import { ErrorResult, Result } from 'ghetto-monad'
 import { commands } from '../lib/commands'
 import { docker, isDockerInstalled } from '../lib/docker'
 import { pluginsPath, worldsPath } from '../lib/paths'
-import { getDockerTag, getPort, getServerName } from '../lib/server'
+import {
+    getCustomBindings,
+    getDockerTag,
+    getPort,
+    getServerName,
+} from '../lib/server'
 import { doUpdateCheck, version } from '../lib/updateCheck'
 import { getInstalledWorlds, hasWorlds } from '../lib/worlds'
 
@@ -62,6 +67,16 @@ function processCommand(command) {
     if (command === commands.inspect.name) {
         inspectContainer()
     }
+    if (command === commands.logs.name) {
+        viewLogs()
+    }
+}
+
+async function viewLogs() {
+    const name = await nameNeeded()
+    const data = await docker.command(`logs ${name}`)
+    console.log(data.raw)
+    return
 }
 
 async function inspectContainer() {
@@ -183,17 +198,16 @@ function restartPausedContainer(name) {
 // }
 
 async function startNewInstance(name) {
-    const mount = (src, dst) =>
-        `--mount type=bind,src=${src},dst=/server/${dst}`
     const tag = await getDockerTag()
     const port = await getPort()
-    const worlds = (await hasWorlds()) ? mount(worldsPath(), 'worlds') : ``
-    const plugins = mount(pluginsPath(), 'scriptcraft-plugins')
+    const bind = await getBindings(name)
     try {
-        await docker.command(
-            `run -d -p ${port}:25565 --name ${name} ${worlds} ${plugins} --restart always magikcraft/scriptcraft:${tag}`
+        const dc = `run -d -p ${port}:25565 --name ${name} ${bind} --restart always magikcraft/scriptcraft:${tag}`
+        await docker.command(dc)
+        console.log(
+            chalk.yellow(`Server ${name} started on localhost:${port}\n`)
         )
-        console.log(`Server ${name} started on localhost:${port}`)
+        console.log(dc)
     } catch (e) {
         console.log('There was an error starting the server!')
         console.log(e)
@@ -201,6 +215,17 @@ async function startNewInstance(name) {
             `\nTry stopping the server, then starting it again.\n\nIf that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`
         )
     }
+}
+
+async function getBindings(name) {
+    const mount = (src, dst) =>
+        `--mount type=bind,src=${src},dst=/server/${dst}`
+    const worlds = (await hasWorlds()) ? mount(worldsPath(), 'worlds') : ``
+    const plugins = mount(pluginsPath(), 'scriptcraft-plugins')
+    const bindings = (await getCustomBindings())
+        .map(({ src, dst }) => mount(src, dst))
+        .join(' ')
+    return `${worlds} ${plugins} ${bindings}`
 }
 
 async function stopServer() {

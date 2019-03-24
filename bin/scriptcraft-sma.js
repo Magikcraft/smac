@@ -90,6 +90,26 @@ function processCommand(command) {
     if (command === commands_1.commands.inspect.name) {
         inspectContainer();
     }
+    if (command === commands_1.commands.logs.name) {
+        viewLogs();
+    }
+}
+function viewLogs() {
+    return __awaiter(this, void 0, void 0, function () {
+        var name, data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, nameNeeded()];
+                case 1:
+                    name = _a.sent();
+                    return [4 /*yield*/, docker_1.docker.command("logs " + name)];
+                case 2:
+                    data = _a.sent();
+                    console.log(data.raw);
+                    return [2 /*return*/];
+            }
+        });
+    });
 }
 function inspectContainer() {
     return __awaiter(this, void 0, void 0, function () {
@@ -270,30 +290,27 @@ function restartPausedContainer(name) {
 // }
 function startNewInstance(name) {
     return __awaiter(this, void 0, void 0, function () {
-        var mount, tag, port, worlds, plugins, e_2;
+        var tag, port, bind, dc, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    mount = function (src, dst) {
-                        return "--mount type=bind,src=" + src + ",dst=/server/" + dst;
-                    };
-                    return [4 /*yield*/, server_1.getDockerTag()];
+                case 0: return [4 /*yield*/, server_1.getDockerTag()];
                 case 1:
                     tag = _a.sent();
                     return [4 /*yield*/, server_1.getPort()];
                 case 2:
                     port = _a.sent();
-                    return [4 /*yield*/, worlds_1.hasWorlds()];
+                    return [4 /*yield*/, getBindings(name)];
                 case 3:
-                    worlds = (_a.sent()) ? mount(paths_1.worldsPath(), 'worlds') : "";
-                    plugins = mount(paths_1.pluginsPath(), 'scriptcraft-plugins');
+                    bind = _a.sent();
                     _a.label = 4;
                 case 4:
                     _a.trys.push([4, 6, , 7]);
-                    return [4 /*yield*/, docker_1.docker.command("run -d -p " + port + ":25565 --name " + name + " " + worlds + " " + plugins + " --restart always magikcraft/scriptcraft:" + tag)];
+                    dc = "run -d -p " + port + ":25565 --name " + name + " " + bind + " --restart always magikcraft/scriptcraft:" + tag;
+                    return [4 /*yield*/, docker_1.docker.command(dc)];
                 case 5:
                     _a.sent();
-                    console.log("Server " + name + " started on localhost:" + port);
+                    console.log(chalk_1.default.yellow("Server " + name + " started on localhost:" + port + "\n"));
+                    console.log(dc);
                     return [3 /*break*/, 7];
                 case 6:
                     e_2 = _a.sent();
@@ -302,6 +319,32 @@ function startNewInstance(name) {
                     console.log("\nTry stopping the server, then starting it again.\n\nIf that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues");
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
+            }
+        });
+    });
+}
+function getBindings(name) {
+    return __awaiter(this, void 0, void 0, function () {
+        var mount, worlds, plugins, bindings;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    mount = function (src, dst) {
+                        return "--mount type=bind,src=" + src + ",dst=/server/" + dst;
+                    };
+                    return [4 /*yield*/, worlds_1.hasWorlds()];
+                case 1:
+                    worlds = (_a.sent()) ? mount(paths_1.worldsPath(), 'worlds') : "";
+                    plugins = mount(paths_1.pluginsPath(), 'scriptcraft-plugins');
+                    return [4 /*yield*/, server_1.getCustomBindings()];
+                case 2:
+                    bindings = (_a.sent())
+                        .map(function (_a) {
+                        var src = _a.src, dst = _a.dst;
+                        return mount(src, dst);
+                    })
+                        .join(' ');
+                    return [2 /*return*/, worlds + " " + plugins + " " + bindings];
             }
         });
     });

@@ -26,4 +26,8 @@ export const commands = {
         description: 'Inspect a running server',
         name: 'inspect',
     },
+    logs: {
+        description: 'View logs for a server',
+        name: 'logs',
+    },
 }

@@ -8,6 +8,7 @@ export interface SMAServerConfig {
     serverName: string
     worlds: string[]
     javaPlugins: string[]
+    bind: { src: string; dst: string }[]
 }
 
 let ServerConfig: Maybe<Result<SMAServerConfig>>
@@ -39,6 +40,15 @@ export async function getPort() {
         return '25565'
     } else {
         return conf.value.port
+    }
+}
+
+export async function getCustomBindings() {
+    const conf = await getServerConfig()
+    if (conf.isNothing || !conf.value.bind) {
+        return []
+    } else {
+        return conf.value.bind
     }
 }
 
