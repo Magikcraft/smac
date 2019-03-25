@@ -176,6 +176,7 @@ if (!command || !commands_1.commands[command]) {
 }
 processCommand(command)
 function printHelp() {
+    console.log(header)
     console.log('Version ' + updateCheck_1.version)
     console.log('\nUsage:')
     console.log('smac <command>')

@@ -30,6 +30,7 @@ if (!command || !commands[command]) {
 processCommand(command)
 
 function printHelp() {
+    console.log(header)
     console.log(`Version ${version}`)
     console.log('\nUsage:')
     console.log('smac <command>')
