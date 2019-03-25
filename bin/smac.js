@@ -106,7 +106,7 @@ function processCommand(command) {
 }
 function viewLogs() {
     return __awaiter(this, void 0, void 0, function () {
-        var name, isRunning, data, log;
+        var name, isRunning, log;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, nameNeeded()];
@@ -120,10 +120,10 @@ function viewLogs() {
                         exit();
                     }
                     console.log('Spawning log viewer');
-                    return [4 /*yield*/, docker_1.docker.command("logs " + name)];
-                case 3:
-                    data = _a.sent();
-                    console.log(log_1.colorise(data.raw));
+                    // const data = await docker.command(`logs ${name}`)
+                    // const history = data.raw.split('\n')
+                    // const historySlice = history.slice(Math.max(history.length - 100, 1))
+                    // console.log(colorise(historySlice.join('\n')))
                     process.on('SIGINT', function () {
                         console.log(chalk_1.default.yellow("\n\nServer " + name + " is still running. Use '") +
                             chalk_1.default.blue("smac stop " + name) +
@@ -131,7 +131,10 @@ function viewLogs() {
                         exit(0);
                     });
                     log = child_process_1.spawn('docker', ['logs', '-f', name]);
-                    log.stdout.on('data', function (d) { return process.stdout.write(log_1.colorise(d.toString())); });
+                    log.stdout.on('data', function (d) {
+                        var lines = log_1.colorise(d.toString());
+                        process.stdout.write(lines);
+                    });
                     return [2 /*return*/];
             }
         });

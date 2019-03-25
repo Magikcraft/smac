@@ -78,8 +78,10 @@ async function viewLogs() {
         exit()
     }
     console.log('Spawning log viewer')
-    const data = await docker.command(`logs ${name}`)
-    console.log(colorise(data.raw))
+    // const data = await docker.command(`logs ${name}`)
+    // const history = data.raw.split('\n')
+    // const historySlice = history.slice(Math.max(history.length - 100, 1))
+    // console.log(colorise(historySlice.join('\n')))
     process.on('SIGINT', () => {
         console.log(
             chalk.yellow(`\n\nServer ${name} is still running. Use '`) +
@@ -90,7 +92,10 @@ async function viewLogs() {
     })
     const log = spawn('docker', ['logs', '-f', name])
 
-    log.stdout!.on('data', d => process.stdout.write(colorise(d.toString())))
+    log.stdout!.on('data', d => {
+        const lines = colorise(d.toString())
+        process.stdout.write(lines)
+    })
 }
 
 async function inspectContainer() {
