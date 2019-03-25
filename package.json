@@ -1,5 +1,5 @@
 {
-    "name": "scriptcraft-sma",
+    "name": "smac",
     "version": "0.0.9",
     "description": "Scriptcraft SMA Server controller",
     "main": "index.js",

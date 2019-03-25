@@ -3,21 +3,21 @@
 ## Install
 
 ```bash
-npm i -g scriptcraft-sma
+npm i -g smac
 ```
 
 ## Run
 
 ```bash
-scriptcraft-sma
+smac
 ```
 
 ```
-➜ scriptcraft-sma
+➜ smac
 Version 0.0.4
 
 Usage:
-sma <command>
+smac <command>
 
 Available commands:
 COMMAND DESCRIPTION

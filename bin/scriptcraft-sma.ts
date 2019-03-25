@@ -6,12 +6,7 @@ import { ErrorResult, Result } from 'ghetto-monad'
 import { commands } from '../lib/commands'
 import { docker, isDockerInstalled } from '../lib/docker'
 import { localPath, pluginsPath, worldsPath } from '../lib/paths'
-import {
-    getCustomBindings,
-    getDockerTag,
-    getPort,
-    getServerName,
-} from '../lib/server'
+import * as server from '../lib/server'
 import { doUpdateCheck, version } from '../lib/updateCheck'
 import { getInstalledWorlds, hasWorlds } from '../lib/worlds'
 
@@ -37,7 +32,7 @@ processCommand(command)
 function printHelp() {
     console.log(`Version ${version}`)
     console.log('\nUsage:')
-    console.log('sma <command>')
+    console.log('smac <command>')
     console.log('\nAvailable commands:')
 
     const commandList = Object.keys(commands).map(c => ({
@@ -125,7 +120,7 @@ function printVersions() {
 }
 
 async function nameNeeded() {
-    const name = await getServerName(serverTarget)
+    const name = await server.getServerName(serverTarget)
     if (name.isNothing) {
         return (exit(1) as unknown) as string
     } else {
@@ -198,8 +193,8 @@ function restartPausedContainer(name) {
 // }
 
 async function startNewInstance(name) {
-    const tag = await getDockerTag()
-    const port = await getPort()
+    const tag = await server.getDockerTag()
+    const port = await server.getPort()
     const bind = await getBindings(name)
     const cache = `--mount source=sma-server-cache,target=/server/cache`
     try {
@@ -223,7 +218,7 @@ async function getBindings(name) {
         `--mount type=bind,src=${src},dst=/server/${dst}`
     const worlds = (await hasWorlds()) ? mount(worldsPath(), 'worlds') : ``
     const plugins = mount(pluginsPath(), 'scriptcraft-plugins')
-    const bindings = (await getCustomBindings())
+    const bindings = (await server.getCustomBindings())
         .map(({ src, dst }) => mount(localPath(src), dst))
         .join(' ')
     return `${worlds} ${plugins} ${bindings}`

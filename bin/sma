@@ -38,6 +38,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var chalk_1 = __importDefault(require("chalk"));
 var columnify_1 = __importDefault(require("columnify"));
@@ -45,7 +52,7 @@ var ghetto_monad_1 = require("ghetto-monad");
 var commands_1 = require("../lib/commands");
 var docker_1 = require("../lib/docker");
 var paths_1 = require("../lib/paths");
-var server_1 = require("../lib/server");
+var server = __importStar(require("../lib/server"));
 var updateCheck_1 = require("../lib/updateCheck");
 var worlds_1 = require("../lib/worlds");
 if (!docker_1.isDockerInstalled) {
@@ -63,7 +70,7 @@ processCommand(command);
 function printHelp() {
     console.log("Version " + updateCheck_1.version);
     console.log('\nUsage:');
-    console.log('sma <command>');
+    console.log('smac <command>');
     console.log('\nAvailable commands:');
     var commandList = Object.keys(commands_1.commands).map(function (c) { return ({
         command: [c],
@@ -175,7 +182,7 @@ function nameNeeded() {
         var name;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, server_1.getServerName(serverTarget)];
+                case 0: return [4 /*yield*/, server.getServerName(serverTarget)];
                 case 1:
                     name = _a.sent();
                     if (name.isNothing) {
@@ -293,10 +300,10 @@ function startNewInstance(name) {
         var tag, port, bind, cache, dc, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, server_1.getDockerTag()];
+                case 0: return [4 /*yield*/, server.getDockerTag()];
                 case 1:
                     tag = _a.sent();
-                    return [4 /*yield*/, server_1.getPort()];
+                    return [4 /*yield*/, server.getPort()];
                 case 2:
                     port = _a.sent();
                     return [4 /*yield*/, getBindings(name)];
@@ -337,7 +344,7 @@ function getBindings(name) {
                 case 1:
                     worlds = (_a.sent()) ? mount(paths_1.worldsPath(), 'worlds') : "";
                     plugins = mount(paths_1.pluginsPath(), 'scriptcraft-plugins');
-                    return [4 /*yield*/, server_1.getCustomBindings()];
+                    return [4 /*yield*/, server.getCustomBindings()];
                 case 2:
                     bindings = (_a.sent())
                         .map(function (_a) {
