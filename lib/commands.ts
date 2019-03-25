@@ -22,9 +22,9 @@ export const commands = {
         description: 'List running SMA servers',
         name: 'list',
     },
-    inspect: {
+    info: {
         description: 'Inspect a running server',
-        name: 'inspect',
+        name: 'info',
     },
     logs: {
         description: 'View logs for a server',

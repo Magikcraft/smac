@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk'
+import { spawn } from 'child_process'
 import columnify from 'columnify'
 import { ErrorResult, Result } from 'ghetto-monad'
 import { commands } from '../lib/commands'
 import { docker, isDockerInstalled } from '../lib/docker'
+import { colorise } from '../lib/log'
 import { localPath, pluginsPath, worldsPath } from '../lib/paths'
 import * as server from '../lib/server'
 import { doUpdateCheck, version } from '../lib/updateCheck'
@@ -60,7 +62,7 @@ function processCommand(command) {
     if (command === commands.list.name) {
         listContainers()
     }
-    if (command === commands.inspect.name) {
+    if (command === commands.info.name) {
         inspectContainer()
     }
     if (command === commands.logs.name) {
@@ -70,9 +72,25 @@ function processCommand(command) {
 
 async function viewLogs() {
     const name = await nameNeeded()
+    const isRunning = await getContainerStatus(name)
+    if (isRunning.isError) {
+        console.log(isRunning.error.message)
+        exit()
+    }
+    console.log('Spawning log viewer')
     const data = await docker.command(`logs ${name}`)
-    console.log(data.raw)
-    return
+    console.log(colorise(data.raw))
+    process.on('SIGINT', () => {
+        console.log(
+            chalk.yellow(`\n\nServer ${name} is still running. Use '`) +
+                chalk.blue(`smac stop ${name}`) +
+                chalk.yellow(' to stop it.')
+        )
+        exit(0)
+    })
+    const log = spawn('docker', ['logs', '-f', name])
+
+    log.stdout!.on('data', d => process.stdout.write(colorise(d.toString())))
 }
 
 async function inspectContainer() {
@@ -102,6 +120,7 @@ function listContainers() {
         console.log(columnify(smaServers))
     })
 }
+
 function printVersions() {
     // return Promise.resolve()
     //     .then(getLocalWorldsMetadata)
@@ -178,6 +197,7 @@ async function startServer() {
     }
     console.log(`Starting ${name}`)
     await startNewInstance(name)
+    viewLogs()
 }
 
 function restartPausedContainer(name) {

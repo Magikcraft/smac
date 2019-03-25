@@ -47,10 +47,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var chalk_1 = __importDefault(require("chalk"));
+var child_process_1 = require("child_process");
 var columnify_1 = __importDefault(require("columnify"));
 var ghetto_monad_1 = require("ghetto-monad");
 var commands_1 = require("../lib/commands");
 var docker_1 = require("../lib/docker");
+var log_1 = require("../lib/log");
 var paths_1 = require("../lib/paths");
 var server = __importStar(require("../lib/server"));
 var updateCheck_1 = require("../lib/updateCheck");
@@ -95,7 +97,7 @@ function processCommand(command) {
     if (command === commands_1.commands.list.name) {
         listContainers();
     }
-    if (command === commands_1.commands.inspect.name) {
+    if (command === commands_1.commands.info.name) {
         inspectContainer();
     }
     if (command === commands_1.commands.logs.name) {
@@ -104,16 +106,32 @@ function processCommand(command) {
 }
 function viewLogs() {
     return __awaiter(this, void 0, void 0, function () {
-        var name, data;
+        var name, isRunning, data, log;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, nameNeeded()];
                 case 1:
                     name = _a.sent();
-                    return [4 /*yield*/, docker_1.docker.command("logs " + name)];
+                    return [4 /*yield*/, getContainerStatus(name)];
                 case 2:
+                    isRunning = _a.sent();
+                    if (isRunning.isError) {
+                        console.log(isRunning.error.message);
+                        exit();
+                    }
+                    console.log('Spawning log viewer');
+                    return [4 /*yield*/, docker_1.docker.command("logs " + name)];
+                case 3:
                     data = _a.sent();
-                    console.log(data.raw);
+                    console.log(log_1.colorise(data.raw));
+                    process.on('SIGINT', function () {
+                        console.log(chalk_1.default.yellow("\n\nServer " + name + " is still running. Use '") +
+                            chalk_1.default.blue("smac stop " + name) +
+                            chalk_1.default.yellow(' to stop it.'));
+                        exit(0);
+                    });
+                    log = child_process_1.spawn('docker', ['logs', '-f', name]);
+                    log.stdout.on('data', function (d) { return process.stdout.write(log_1.colorise(d.toString())); });
                     return [2 /*return*/];
             }
         });
@@ -281,6 +299,7 @@ function startServer() {
                     return [4 /*yield*/, startNewInstance(name)];
                 case 6:
                     _a.sent();
+                    viewLogs();
                     return [2 /*return*/];
             }
         });
