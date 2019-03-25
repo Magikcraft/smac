@@ -1,15 +1,37 @@
 import * as fs from 'fs-extra'
 import { Nothing, Result } from 'ghetto-monad'
-import { worldsPath } from './paths'
+import { downloadZipFile } from './download'
+import { localWorldPath, smaWorldPath } from './paths'
+import { WorldDefinition } from './server'
 
-export async function getInstalledWorlds() {
-    const worldDir = worldsPath()
-    if (!fs.existsSync(worldDir)) {
-        return new Nothing()
+export class World {
+    worldSpec: WorldDefinition
+    constructor(worldSpec: WorldDefinition) {
+        this.worldSpec = worldSpec
     }
-    return new Result(fs.readdirSync(worldDir))
-}
 
-export async function hasWorlds() {
-    return !(await getInstalledWorlds()).isNothing
+    async getPath() {
+        const worldExistsLocally = targetPath => fs.existsSync(targetPath)
+        const worldDir = `${this.worldSpec.name}/${this.worldSpec.version}`
+        const localPath = localWorldPath(worldDir)
+        const smaPath = smaWorldPath(worldDir)
+        if (worldExistsLocally(localPath)) {
+            return new Result(localPath)
+        }
+        if (worldExistsLocally(smaPath)) {
+            return new Result(smaPath)
+        }
+        if (!this.worldSpec.downloadUrl) {
+            console.log(
+                `World ${this.worldSpec.name} version ${
+                    this.worldSpec.version
+                } not found locally, and no downloadUrl specified.`
+            )
+            console.log('Searched in:')
+            console.log(`${localPath}`)
+            console.log(`${smaPath}`)
+            return new Nothing()
+        }
+        return downloadZipFile(this.worldSpec, smaPath)
+    }
 }

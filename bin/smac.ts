@@ -5,14 +5,12 @@ import { spawn } from 'child_process'
 import columnify from 'columnify'
 import { ErrorResult, Result } from 'ghetto-monad'
 import { commands } from '../lib/commands'
-import { docker, isDockerInstalled } from '../lib/docker'
+import * as docker from '../lib/docker'
 import { colorise } from '../lib/log'
-import { localPath, pluginsPath, worldsPath } from '../lib/paths'
-import * as server from '../lib/server'
+import { server } from '../lib/server'
 import { doUpdateCheck, version } from '../lib/updateCheck'
-import { getInstalledWorlds, hasWorlds } from '../lib/worlds'
 
-if (!isDockerInstalled) {
+if (!docker.isDockerInstalled) {
     console.log(
         'Docker not found. Please install Docker from https://www.docker.com.'
     )
@@ -78,10 +76,6 @@ async function viewLogs() {
         exit()
     }
     console.log('Spawning log viewer')
-    // const data = await docker.command(`logs ${name}`)
-    // const history = data.raw.split('\n')
-    // const historySlice = history.slice(Math.max(history.length - 100, 1))
-    // console.log(colorise(historySlice.join('\n')))
     process.on('SIGINT', () => {
         console.log(
             chalk.yellow(`\n\nServer ${name} is still running. Use '`) +
@@ -156,13 +150,7 @@ async function nameNeeded() {
 async function getContainerStatus(name: string) {
     try {
         const data = await docker.command(`inspect ${name}`)
-        const w = await getInstalledWorlds()
-        const worlds = w.isNothing ? [] : w.value
-        return new Result(
-            Object.assign(data.object[0].State, {
-                worlds,
-            })
-        )
+        return new Result(data.object[0].State)
     } catch (e) {
         return new ErrorResult(new Error(`Server ${name} is not running`))
     }
@@ -182,14 +170,22 @@ async function startServer() {
     const name = await nameNeeded()
 
     // @TODO
-    // getWorldsIfNeeded()
     // installJSPluginsIfNeeded()
     // installJavaPluginsIfNeeded()
     const data = await getContainerStatus(name)
     if (!data.isError) {
         if (data.value.Status === 'running') {
             console.log('Server is already running.')
-            exit()
+            return exit()
+        }
+        if (data.value.Status === 'created') {
+            console.log(
+                'Server has been created, but is not running. Trying waiting, or stopping it.'
+            )
+            console.log(
+                `If that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`
+            )
+            return exit()
         }
         if (data.value.Status === 'exited') {
             return removeStoppedInstance(name)
@@ -221,7 +217,7 @@ function restartPausedContainer(name) {
 async function startNewInstance(name) {
     const tag = await server.getDockerTag()
     const port = await server.getPort()
-    const bind = await getBindings(name)
+    const bind = await server.getBindings(name)
     const cache = `--mount source=sma-server-cache,target=/server/cache`
     try {
         const dc = `run -d -p ${port}:25565 --name ${name} ${bind} ${cache} --restart always magikcraft/scriptcraft:${tag}`
@@ -237,17 +233,6 @@ async function startNewInstance(name) {
             `\nTry stopping the server, then starting it again.\n\nIf that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`
         )
     }
-}
-
-async function getBindings(name) {
-    const mount = (src, dst) =>
-        `--mount type=bind,src=${src},dst=/server/${dst}`
-    const worlds = (await hasWorlds()) ? mount(worldsPath(), 'worlds') : ``
-    const plugins = mount(pluginsPath(), 'scriptcraft-plugins')
-    const bindings = (await server.getCustomBindings())
-        .map(({ src, dst }) => mount(localPath(src), dst))
-        .join(' ')
-    return `${worlds} ${plugins} ${bindings}`
 }
 
 async function stopServer() {

@@ -51,13 +51,11 @@ var child_process_1 = require("child_process");
 var columnify_1 = __importDefault(require("columnify"));
 var ghetto_monad_1 = require("ghetto-monad");
 var commands_1 = require("../lib/commands");
-var docker_1 = require("../lib/docker");
+var docker = __importStar(require("../lib/docker"));
 var log_1 = require("../lib/log");
-var paths_1 = require("../lib/paths");
-var server = __importStar(require("../lib/server"));
+var server_1 = require("../lib/server");
 var updateCheck_1 = require("../lib/updateCheck");
-var worlds_1 = require("../lib/worlds");
-if (!docker_1.isDockerInstalled) {
+if (!docker.isDockerInstalled) {
     console.log('Docker not found. Please install Docker from https://www.docker.com.');
     process.exit(1);
 }
@@ -120,10 +118,6 @@ function viewLogs() {
                         exit();
                     }
                     console.log('Spawning log viewer');
-                    // const data = await docker.command(`logs ${name}`)
-                    // const history = data.raw.split('\n')
-                    // const historySlice = history.slice(Math.max(history.length - 100, 1))
-                    // console.log(colorise(historySlice.join('\n')))
                     process.on('SIGINT', function () {
                         console.log(chalk_1.default.yellow("\n\nServer " + name + " is still running. Use '") +
                             chalk_1.default.blue("smac stop " + name) +
@@ -157,7 +151,7 @@ function inspectContainer() {
                     }
                     console.log(chalk_1.default.blue(name + ":"));
                     console.log(status.value);
-                    return [4 /*yield*/, docker_1.docker.command("inspect " + name)
+                    return [4 /*yield*/, docker.command("inspect " + name)
                         // console.log(data.object[0].State)
                     ];
                 case 3:
@@ -174,7 +168,7 @@ function inspectContainer() {
     });
 }
 function listContainers() {
-    docker_1.docker.command('ps').then(function (data) {
+    docker.command('ps').then(function (data) {
         var smaServers = data.containerList
             .filter(function (c) { return c.image.indexOf('magikcraft/scriptcraft') === 0; })
             .map(function (c) { return ({ name: c.names, status: c.status }); });
@@ -204,7 +198,7 @@ function nameNeeded() {
         var name;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, server.getServerName(serverTarget)];
+                case 0: return [4 /*yield*/, server_1.server.getServerName(serverTarget)];
                 case 1:
                     name = _a.sent();
                     if (name.isNothing) {
@@ -220,25 +214,19 @@ function nameNeeded() {
 }
 function getContainerStatus(name) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, w, worlds, e_1;
+        var data, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, docker_1.docker.command("inspect " + name)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, docker.command("inspect " + name)];
                 case 1:
                     data = _a.sent();
-                    return [4 /*yield*/, worlds_1.getInstalledWorlds()];
+                    return [2 /*return*/, new ghetto_monad_1.Result(data.object[0].State)];
                 case 2:
-                    w = _a.sent();
-                    worlds = w.isNothing ? [] : w.value;
-                    return [2 /*return*/, new ghetto_monad_1.Result(Object.assign(data.object[0].State, {
-                            worlds: worlds,
-                        }))];
-                case 3:
                     e_1 = _a.sent();
                     return [2 /*return*/, new ghetto_monad_1.ErrorResult(new Error("Server " + name + " is not running"))];
-                case 4: return [2 /*return*/];
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -271,7 +259,6 @@ function startServer() {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, nameNeeded()
                     // @TODO
-                    // getWorldsIfNeeded()
                     // installJSPluginsIfNeeded()
                     // installJavaPluginsIfNeeded()
                 ];
@@ -283,7 +270,12 @@ function startServer() {
                     if (!!data.isError) return [3 /*break*/, 5];
                     if (data.value.Status === 'running') {
                         console.log('Server is already running.');
-                        exit();
+                        return [2 /*return*/, exit()];
+                    }
+                    if (data.value.Status === 'created') {
+                        console.log('Server has been created, but is not running. Trying waiting, or stopping it.');
+                        console.log("If that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues");
+                        return [2 /*return*/, exit()];
                     }
                     if (data.value.Status === 'exited') {
                         return [2 /*return*/, removeStoppedInstance(name)];
@@ -310,7 +302,7 @@ function startServer() {
 }
 function restartPausedContainer(name) {
     console.log("Unpausing " + name);
-    return docker_1.docker.command("unpause " + name);
+    return docker.command("unpause " + name);
 }
 // function getWorldsIfNeeded() {
 //     return Promise.resolve().then(() => mct1WorldsExistLocally() || getWorlds())
@@ -323,13 +315,13 @@ function startNewInstance(name) {
         var tag, port, bind, cache, dc, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, server.getDockerTag()];
+                case 0: return [4 /*yield*/, server_1.server.getDockerTag()];
                 case 1:
                     tag = _a.sent();
-                    return [4 /*yield*/, server.getPort()];
+                    return [4 /*yield*/, server_1.server.getPort()];
                 case 2:
                     port = _a.sent();
-                    return [4 /*yield*/, getBindings(name)];
+                    return [4 /*yield*/, server_1.server.getBindings(name)];
                 case 3:
                     bind = _a.sent();
                     cache = "--mount source=sma-server-cache,target=/server/cache";
@@ -337,7 +329,7 @@ function startNewInstance(name) {
                 case 4:
                     _a.trys.push([4, 6, , 7]);
                     dc = "run -d -p " + port + ":25565 --name " + name + " " + bind + " " + cache + " --restart always magikcraft/scriptcraft:" + tag;
-                    return [4 /*yield*/, docker_1.docker.command(dc)];
+                    return [4 /*yield*/, docker.command(dc)];
                 case 5:
                     _a.sent();
                     console.log(chalk_1.default.yellow("Server " + name + " started on localhost:" + port + "\n"));
@@ -350,32 +342,6 @@ function startNewInstance(name) {
                     console.log("\nTry stopping the server, then starting it again.\n\nIf that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues");
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
-            }
-        });
-    });
-}
-function getBindings(name) {
-    return __awaiter(this, void 0, void 0, function () {
-        var mount, worlds, plugins, bindings;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    mount = function (src, dst) {
-                        return "--mount type=bind,src=" + src + ",dst=/server/" + dst;
-                    };
-                    return [4 /*yield*/, worlds_1.hasWorlds()];
-                case 1:
-                    worlds = (_a.sent()) ? mount(paths_1.worldsPath(), 'worlds') : "";
-                    plugins = mount(paths_1.pluginsPath(), 'scriptcraft-plugins');
-                    return [4 /*yield*/, server.getCustomBindings()];
-                case 2:
-                    bindings = (_a.sent())
-                        .map(function (_a) {
-                        var src = _a.src, dst = _a.dst;
-                        return mount(paths_1.localPath(src), dst);
-                    })
-                        .join(' ');
-                    return [2 /*return*/, worlds + " " + plugins + " " + bindings];
             }
         });
     });
@@ -436,7 +402,7 @@ function stopRunningInstance(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, docker_1.docker.command("stop " + name)];
+                case 0: return [4 /*yield*/, docker.command("stop " + name)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -450,7 +416,7 @@ function removeStoppedInstance(name) {
             switch (_a.label) {
                 case 0:
                     console.log('Removing stopped container');
-                    return [4 /*yield*/, docker_1.docker.command("rm " + name)];
+                    return [4 /*yield*/, docker.command("rm " + name)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];

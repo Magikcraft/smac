@@ -1,9 +1,19 @@
+import { homedir } from 'os'
 import * as path from 'path'
+
+const home = homedir()
 
 const cwd = process.cwd()
 
+export const smaPath = p => path.join(home, '.sma', p)
+
 export const localPath = p => path.join(cwd, p)
 
-export const worldsPath = () => localPath('worlds')
+export const localWorldsPath = () => localPath('worlds')
+
+export const smaWorldsPath = () => smaPath('worlds')
+
+export const localWorldPath = path => `${localWorldsPath()}/${path}`
+export const smaWorldPath = path => `${smaWorldsPath()}/${path}`
 
 export const pluginsPath = () => localPath('node_modules')
