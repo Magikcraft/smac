@@ -1,4 +1,6 @@
-# SMA Server
+# SMA Controller - Scriptcraft Modular Architecture
+
+Manages dockerised Minecraft servers for developing and deploying Javascript Minecraft plugins written using [Scriptcraft](https://github.com/walterhiggins/ScriptCraft) and the [Scriptcraft Modular Architecture](https://github.com/Magikcraft/scriptcraft-modular-arch).
 
 ## Install
 
@@ -41,25 +43,15 @@ You can custom bind directories in an `smaServerConfig`. This is useful when you
 
 Here is an example configuration that I use to work on the MCT1 plugin. I custom bind the mct1 worlds from their local repo checkout.
 
-I have the `@magikcraft/op-all` plugin installed to give myself op on the server automatically, and I use `npm link` to add the MCT1 plugin to the directory.
+I have the `@magikcraft/op-all` plugin installed to give myself op on the server automatically, and I bind the local checkout of the MCT1 plugin into the server to test my changes as I make them.
+
+Note: `npm link` is a standard way to work on a local check-out of a package, however, this doesn't work by default on a Mac with docker.
 
 Please see [this issue](https://github.com/Magikcraft/scriptcraft-sma/issues/1) about using `npm link` with SMA on Mac OS. You must change your Docker preferences for it to work.
 
-So, in the checkout of the MCT1 plugin where I am working, I do:
+Using a custom bind is a way to do this without having to configure Docker.
 
-```bash
-npm link
-```
-
-Then in the directory with my server config, I do:
-
-```bash
-npm link @magikcraft/mct1
-```
-
-This symlinks my development check-out into the `node_modules`.
-
-Then I have this in my server `package.json`:
+I have this subkey in my server's `package.json`:
 
 ```json
 "smaServerConfig": {
@@ -70,6 +62,10 @@ Then I have this in my server `package.json`:
     {
       "src": "../mct1-worlds",
       "dst": "worlds"
+    },
+    {
+        "src": "../mct1",
+        "dst": "scriptcraft-plugins/@magikcraft/mct1"
     }
   ]
 }
