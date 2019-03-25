@@ -17,16 +17,16 @@ export async function downloadZipFile(
     worldSpec: WorldDefinition,
     targetPath: string
 ) {
-    const tmpPath = findSuitableTempDirectory()
+    const tmpPath = findSuitableTempDirectory(worldSpec.name)
     if (tmpPath.isNothing) {
         return tmpPath
     }
     const fileName = worldSpec.downloadUrl.split('/').pop()
-    const downloadedFile = path.join(tmpPath.value, fileName!)
+    const downloadedFile = path.join(tmpPath.value, fileName || worldSpec.name)
     if (fs.existsSync(downloadedFile)) {
         console.log('Worlds already downloaded as', downloadedFile)
     } else {
-        console.log(`Downloading world ${name}`)
+        console.log(`Downloading world ${worldSpec.name}`)
         console.log('Downloading', worldSpec.downloadUrl)
         console.log('Saving to', downloadedFile)
         const download = await requestWorldZip(
@@ -45,7 +45,7 @@ export async function downloadZipFile(
     return worldPath
 }
 
-function findSuitableTempDirectory() {
+function findSuitableTempDirectory(worldName: string) {
     var now = Date.now()
     var candidateTmpDirs = [
         process.env.npm_config_tmp,
@@ -58,7 +58,7 @@ function findSuitableTempDirectory() {
         if (!candidatePath) continue
 
         try {
-            candidatePath = path.join(path.resolve(candidatePath), 'mct1')
+            candidatePath = path.join(path.resolve(candidatePath), worldName)
             //@ts-ignore
             fs.mkdirsSync(candidatePath, '0777')
             // Make double sure we have 0777 permissions; some operating systems

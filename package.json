@@ -53,6 +53,7 @@
         "ghetto-monad": "^2.1.2",
         "progress": "^2.0.3",
         "request-progress": "^3.0.0",
+        "sillyname": "^0.1.0",
         "spawn-npm-install": "^1.2.0",
         "update-check": "^1.5.3"
     }

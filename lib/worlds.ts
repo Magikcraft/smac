@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra'
 import { Nothing, Result } from 'ghetto-monad'
+import generateName from 'sillyname'
 import { downloadZipFile } from './download'
 import { localWorldPath, smaWorldPath } from './paths'
 import { WorldDefinition } from './server'
@@ -8,6 +9,13 @@ export class World {
     worldSpec: WorldDefinition
     constructor(worldSpec: WorldDefinition) {
         this.worldSpec = worldSpec
+        this.worldSpec.name =
+            this.worldSpec.name ||
+            generateName()
+                .split(' ')
+                .join()
+        this.worldSpec.version = this.worldSpec.version || '1.0.0'
+        console.log(this.worldSpec)
     }
 
     async getPath() {
@@ -32,6 +40,7 @@ export class World {
             console.log(`${smaPath}`)
             return new Nothing()
         }
+        console.log(`Downloading ${this.worldSpec.name}`)
         return downloadZipFile(this.worldSpec, smaPath)
     }
 }
