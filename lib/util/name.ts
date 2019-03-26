@@ -33,7 +33,6 @@ export async function getTargetForCommand({
     if (includeRunningContainer) {
         const running = await getContainerList()
         if (running.length === 1) {
-            console.log(running[0].name)
             return new Result(running[0].name)
         } else {
             return new Nothing()
