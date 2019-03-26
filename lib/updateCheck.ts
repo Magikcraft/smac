@@ -21,6 +21,6 @@ export async function doUpdateCheck() {
                 }. Please update!`
             )
         )
-        console.log(chalk.blue('\nnpm i -g mct1-server\n'))
+        console.log(chalk.blue('\nnpm i -g smac\n'))
     }
 }
