@@ -150,7 +150,11 @@ async function nameNeeded() {
 async function getContainerStatus(name: string) {
     try {
         const data = await docker.command(`inspect ${name}`)
-        return new Result(data.object[0].State)
+        return new Result({
+            State: data.object[0].State,
+            Mounts: data.object[0].Mounts,
+            ...data.object[0].NetworkSettings.Ports,
+        })
     } catch (e) {
         return new ErrorResult(new Error(`Server ${name} is not running`))
     }

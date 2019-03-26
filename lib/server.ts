@@ -29,11 +29,15 @@ class Server {
 
     async getBindings(name) {
         const worlds = await this.getWorldMounts()
-        const plugins = docker.makeMount(pluginsPath(), 'scriptcraft-plugins')
+        const nodeModules = fs.existsSync(pluginsPath())
+            ? docker.makeMount(pluginsPath(), 'scriptcraft-plugins')
+            : ''
         const bindings = (await this.getCustomBindings())
             .map(({ src, dst }) => docker.makeMount(localPath(src), dst))
             .join(' ')
-        return `${worlds} ${plugins} ${bindings}`
+        console.log('Found bindings in config:')
+        console.log(bindings)
+        return `${worlds} ${nodeModules} ${bindings}`
     }
 
     private async getWorldMounts() {

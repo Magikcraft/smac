@@ -1,5 +1,16 @@
 #!/usr/bin/env node
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -222,7 +233,7 @@ function getContainerStatus(name) {
                     return [4 /*yield*/, docker.command("inspect " + name)];
                 case 1:
                     data = _a.sent();
-                    return [2 /*return*/, new ghetto_monad_1.Result(data.object[0].State)];
+                    return [2 /*return*/, new ghetto_monad_1.Result(__assign({ State: data.object[0].State, Mounts: data.object[0].Mounts }, data.object[0].NetworkSettings.Ports))];
                 case 2:
                     e_1 = _a.sent();
                     return [2 /*return*/, new ghetto_monad_1.ErrorResult(new Error("Server " + name + " is not running"))];
