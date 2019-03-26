@@ -1,21 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.commands = {
+export const commandMap = {
     start: {
         description: 'Start a server',
         name: 'start',
     },
+
     stop: {
         description: 'Stop a server',
         name: 'stop',
     },
+
     status: {
         description: 'Get the status of a server',
         name: 'status',
-    },
-    version: {
-        description: 'Output version information',
-        name: 'version',
     },
     list: {
         description: 'List running SMA servers',
@@ -29,4 +25,4 @@ exports.commands = {
         description: 'View logs for a server',
         name: 'logs',
     },
-};
+}

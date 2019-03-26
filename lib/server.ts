@@ -9,19 +9,19 @@ import { World } from './worlds'
 class Server {
     static defaultPort = 25565
     static defaultDockerTag = 'latest'
+    static defaultMemory = 2048
+    static restPort = 8086
+    static restPassword = 'INSECURE'
     serverConfig: Promise<Maybe<Result<SMAServerConfig>>>
 
     constructor() {
         this.serverConfig = this.getServerConfig()
     }
 
-    async getServerName(serverTarget?: string) {
-        if (serverTarget) {
-            return new Result(serverTarget)
-        }
+    async getServerTargetFromPackageJson() {
         const conf = await this.getServerConfig()
         if (conf.isNothing) {
-            return conf
+            return new Nothing()
         } else {
             return new Result(conf.value.serverName)
         }
@@ -160,6 +160,39 @@ class Server {
         }
     }
 
+    async getMemoryConfig() {
+        const conf = await this.getServerConfig()
+        if (conf.isNothing || !conf.value.memory) {
+            return Server.defaultMemory
+        } else {
+            return conf.value.memory
+        }
+    }
+
+    async getRestConfig(): Promise<RestConfig> {
+        const conf = await this.getServerConfig()
+        const defaultConfig = {
+            port: Server.restPort,
+            password: Server.restPassword,
+        }
+
+        if (conf.isNothing || !conf.value.restEndpoint) {
+            return defaultConfig
+        } else {
+            return { ...defaultConfig, ...conf.value.restEndpoint }
+        }
+    }
+
+    async getEnvironment() {
+        const memory = await this.getMemoryConfig()
+        const restConfig = await this.getRestConfig()
+        const env = [] as any
+        env.push(`-e SERVERMEM=${memory}`)
+        env.push(`-e MINECRAFT_REST_CONSOLE_PORT=${restConfig.port}`)
+        env.push(`-e MINECRAFT_REST_CONSOLE_API_KEY=${restConfig.password}`)
+        return env.join(' ')
+    }
+
     private async getCustomBindings() {
         const conf = await this.getServerConfig()
         if (conf.isNothing || !conf.value.bind) {
@@ -176,12 +209,10 @@ class Server {
         const cwd = process.cwd()
         const pkgPath = path.join(cwd, 'package.json')
         if (!fs.existsSync(pkgPath)) {
-            console.log(`No package.json found at ${pkgPath}`)
             return new Nothing()
         }
         const md = await import(pkgPath)
         if (!md.smaServerConfig) {
-            console.log('No smaServerConfig key found in package.json')
             return new Nothing()
         }
         return new Result<SMAServerConfig>(md.smaServerConfig)
@@ -206,6 +237,13 @@ export interface SMAServerConfig {
     worlds: WorldDefinition[]
     javaPlugins: string[]
     bind: { src: string; dst: string }[]
+    memory: number
+    restEndpoint: RestConfig
+}
+
+export interface RestConfig {
+    port: number
+    password: string
 }
 
 export interface WorldDefinition {

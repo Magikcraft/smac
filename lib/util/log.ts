@@ -38,6 +38,7 @@ function colorizeTime(line, keyword, color) {
 }
 
 function colorizeWords(line, keyword, color) {
+    if (!keyword) return line
     const colored = line.replaceAll(keyword, color(keyword))
     return colored
 }
@@ -66,10 +67,9 @@ function namespace(line) {
         })
     } else {
         if (!customPluginColors[plugin]) {
-            customPluginColors[plugin] =
-                colorChoices[
-                    Object.keys(customPluginColors).length % colorChoices.length
-                ]
+            const length = Object.keys(customPluginColors).length
+            const next = length % colorChoices.length
+            customPluginColors[plugin] = colorChoices[next]
         }
         customColors.push({
             keyword: `[${plugin}]`,
