@@ -27,6 +27,6 @@ exports.commandMap = {
     },
     restart: {
         description: 'Restart the server',
-        name: 'restart'
-    }
+        name: 'restart',
+    },
 };
