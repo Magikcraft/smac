@@ -9,7 +9,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const commands = __importStar(require("../commands"));
-const commandMap_1 = require("../lib/commandMap.");
+const commandMap_1 = require("../commands/commandMap.");
 const docker = __importStar(require("../lib/docker"));
 const exit_1 = require("../lib/util/exit");
 if (!docker.isDockerInstalled) {

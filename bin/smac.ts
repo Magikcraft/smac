@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as commands from '../commands'
-import { commandMap } from '../lib/commandMap.'
+import { commandMap } from '../commands/commandMap.'
 import * as docker from '../lib/docker'
 import { exit } from '../lib/util/exit'
 

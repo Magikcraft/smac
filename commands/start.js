@@ -27,40 +27,49 @@ const name_1 = require("../lib/util/name");
 const logs_1 = require("./logs");
 const status_1 = require("./status");
 const stop_1 = require("./stop");
-function startServer() {
+function startServer(serverTarget) {
     return __awaiter(this, void 0, void 0, function* () {
-        const name = yield name_1.getTargetForCommand({ includeRunningContainer: false });
-        if (name.isNothing) {
-            console.log('No name provided, and no package.json with a server name found.');
-            return exit_1.exit();
+        let target;
+        if (serverTarget) {
+            target = serverTarget;
+        }
+        else {
+            const name = yield name_1.getTargetForCommand({
+                includeRunningContainer: false,
+            });
+            if (name.isNothing) {
+                console.log('No name provided, and no package.json with a server name found.');
+                return exit_1.exit();
+            }
+            target = name.value;
         }
         // @TODO
         // installJSPluginsIfNeeded()
         // installJavaPluginsIfNeeded()
-        const data = yield status_1.getContainerStatus(name.value);
+        const data = yield status_1.getContainerStatus(target);
         if (!data.isError) {
             if (data.value.Status === 'running') {
-                console.log(`${name.value} is already running.`);
+                console.log(`${target} is already running.`);
                 return exit_1.exit();
             }
             if (data.value.Status === 'created') {
-                console.log(`${name.value} has been created, but is not running. Trying waiting, or stopping it.`);
+                console.log(`${target} has been created, but is not running. Trying waiting, or stopping it.`);
                 console.log(`If that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`);
                 return exit_1.exit();
             }
             if (data.value.Status === 'exited') {
-                return stop_1.removeStoppedInstance(name.value);
+                return stop_1.removeStoppedInstance(target);
             }
             if (data.value.Status === 'paused') {
-                yield restartPausedContainer(name.value);
+                yield restartPausedContainer(target);
                 yield status_1.getStatus();
                 exit_1.exit();
             }
         }
-        console.log(`Starting ${name.value}`);
-        const result = yield startNewInstance(name.value);
+        console.log(`Starting ${target}`);
+        const result = yield startNewInstance(target);
         if (!result.isError) {
-            logs_1.viewLogs();
+            logs_1.viewLogs({ serverTarget: target, started: true });
         }
     });
 }
@@ -82,7 +91,11 @@ function startNewInstance(name) {
             yield docker.command(dc);
             console.log(chalk_1.default.yellow(`Server ${name} started on localhost:${port}\n`));
             console.log('Start command:');
-            console.log(dc.split('--').join('\n\t--'));
+            const startCommand = dc
+                .split('--')
+                .map(s => `${s} \\`)
+                .join('\n\t--');
+            console.log(chalk_1.default.gray(startCommand));
             return new ghetto_monad_1.Result(true);
         }
         catch (e) {

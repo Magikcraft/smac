@@ -3,25 +3,31 @@ import { exit } from '../lib/util/exit'
 import { getTargetForCommand, hintRunningContainers } from '../lib/util/name'
 import { getContainerStatus } from './status'
 
-export async function stopServer() {
-    const name = await getTargetForCommand()
-    if (name.isNothing) {
-        hintRunningContainers()
-        return exit()
+export async function stopServer(serverTarget?: string) {
+    let target
+    if (serverTarget) {
+        target = serverTarget
+    } else {
+        const name = await getTargetForCommand()
+        if (name.isNothing) {
+            hintRunningContainers()
+            return exit()
+        }
+        target = name.value
     }
-    const data = await getContainerStatus(name.value)
+    const data = await getContainerStatus(target)
     if (data.isError) {
         console.log(data.error.message)
         return exit()
     }
     if (data.value.Status === 'exited') {
-        await removeStoppedInstance(name.value)
+        await removeStoppedInstance(target)
         exit()
     }
-    console.log(`Shutting down ${name.value}...`)
+    console.log(`Shutting down ${target}...`)
 
-    await stopRunningInstance(name.value)
-    await removeStoppedInstance(name.value)
+    await stopRunningInstance(target)
+    await removeStoppedInstance(target)
 }
 
 async function stopRunningInstance(name: string) {

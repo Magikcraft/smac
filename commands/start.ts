@@ -8,28 +8,34 @@ import { viewLogs } from './logs'
 import { getContainerStatus, getStatus } from './status'
 import { removeStoppedInstance } from './stop'
 
-export async function startServer() {
-    const name = await getTargetForCommand({ includeRunningContainer: false })
-    if (name.isNothing) {
-        console.log(
-            'No name provided, and no package.json with a server name found.'
-        )
-        return exit()
+export async function startServer(serverTarget?: string) {
+    let target: string
+    if (serverTarget) {
+        target = serverTarget
+    } else {
+        const name = await getTargetForCommand({
+            includeRunningContainer: false,
+        })
+        if (name.isNothing) {
+            console.log(
+                'No name provided, and no package.json with a server name found.'
+            )
+            return exit()
+        }
+        target = name.value
     }
     // @TODO
     // installJSPluginsIfNeeded()
     // installJavaPluginsIfNeeded()
-    const data = await getContainerStatus(name.value)
+    const data = await getContainerStatus(target)
     if (!data.isError) {
         if (data.value.Status === 'running') {
-            console.log(`${name.value} is already running.`)
+            console.log(`${target} is already running.`)
             return exit()
         }
         if (data.value.Status === 'created') {
             console.log(
-                `${
-                    name.value
-                } has been created, but is not running. Trying waiting, or stopping it.`
+                `${target} has been created, but is not running. Trying waiting, or stopping it.`
             )
             console.log(
                 `If that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`
@@ -37,18 +43,18 @@ export async function startServer() {
             return exit()
         }
         if (data.value.Status === 'exited') {
-            return removeStoppedInstance(name.value)
+            return removeStoppedInstance(target)
         }
         if (data.value.Status === 'paused') {
-            await restartPausedContainer(name.value)
+            await restartPausedContainer(target)
             await getStatus()
             exit()
         }
     }
-    console.log(`Starting ${name.value}`)
-    const result = await startNewInstance(name.value)
+    console.log(`Starting ${target}`)
+    const result = await startNewInstance(target)
     if (!result.isError) {
-        viewLogs()
+        viewLogs({ serverTarget: target, started: true })
     }
 }
 
@@ -73,7 +79,11 @@ async function startNewInstance(name: string) {
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)
         )
         console.log('Start command:')
-        console.log(dc.split('--').join('\n\t--'))
+        const startCommand = dc
+            .split('--')
+            .map(s => `${s} \\`)
+            .join('\n\t--')
+        console.log(chalk.gray(startCommand))
         return new Result(true)
     } catch (e) {
         console.log('There was an error starting the server!')

@@ -19,25 +19,32 @@ const docker = __importStar(require("../lib/docker"));
 const exit_1 = require("../lib/util/exit");
 const name_1 = require("../lib/util/name");
 const status_1 = require("./status");
-function stopServer() {
+function stopServer(serverTarget) {
     return __awaiter(this, void 0, void 0, function* () {
-        const name = yield name_1.getTargetForCommand();
-        if (name.isNothing) {
-            name_1.hintRunningContainers();
-            return exit_1.exit();
+        let target;
+        if (serverTarget) {
+            target = serverTarget;
         }
-        const data = yield status_1.getContainerStatus(name.value);
+        else {
+            const name = yield name_1.getTargetForCommand();
+            if (name.isNothing) {
+                name_1.hintRunningContainers();
+                return exit_1.exit();
+            }
+            target = name.value;
+        }
+        const data = yield status_1.getContainerStatus(target);
         if (data.isError) {
             console.log(data.error.message);
             return exit_1.exit();
         }
         if (data.value.Status === 'exited') {
-            yield removeStoppedInstance(name.value);
+            yield removeStoppedInstance(target);
             exit_1.exit();
         }
-        console.log(`Shutting down ${name.value}...`);
-        yield stopRunningInstance(name.value);
-        yield removeStoppedInstance(name.value);
+        console.log(`Shutting down ${target}...`);
+        yield stopRunningInstance(target);
+        yield removeStoppedInstance(target);
     });
 }
 exports.stopServer = stopServer;

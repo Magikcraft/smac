@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const columnify_1 = __importDefault(require("columnify"));
-const commandMap_1 = require("../lib/commandMap.");
 const version_1 = require("../lib/util/version");
+const commandMap_1 = require("./commandMap.");
 function printHelp() {
     console.log(version_1.header);
     console.log(`Version ${version_1.version}`);

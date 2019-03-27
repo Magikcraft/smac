@@ -18,31 +18,42 @@ const exit_1 = require("../lib/util/exit");
 const log_1 = require("../lib/util/log");
 const name_1 = require("../lib/util/name");
 const status_1 = require("./status");
-function viewLogs() {
+let AlreadyStarted = false;
+function viewLogs({ serverTarget, started = false, } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
-        const name = yield name_1.getTargetForCommand();
-        if (name.isNothing) {
-            name_1.hintRunningContainers();
-            return exit_1.exit();
+        let target;
+        if (serverTarget) {
+            target = serverTarget;
         }
-        const isRunning = yield status_1.getContainerStatus(name.value);
+        else {
+            const name = yield name_1.getTargetForCommand();
+            if (name.isNothing) {
+                name_1.hintRunningContainers();
+                return exit_1.exit();
+            }
+            target = name.value;
+        }
+        const isRunning = yield status_1.getContainerStatus(target);
         if (isRunning.isError) {
             console.log(isRunning.error.message);
             exit_1.exit();
         }
         console.log('Spawning log viewer');
-        process.on('SIGINT', () => {
-            console.log(chalk_1.default.yellow(`\n\nServer ${name.value} is still running. Use '`) +
-                chalk_1.default.blue(`smac stop ${name.value}`) +
-                chalk_1.default.yellow(' to stop it.'));
-            exit_1.exit(0);
-        });
-        const log = child_process_1.spawn('docker', ['logs', '-f', name.value]);
+        if (!AlreadyStarted) {
+            process.on('SIGINT', () => {
+                console.log(chalk_1.default.yellow(`\n\nServer ${target} is still running. Use '`) +
+                    chalk_1.default.blue(`smac stop ${target}`) +
+                    chalk_1.default.yellow(' to stop it.'));
+                exit_1.exit(0);
+            });
+            terminal_1.startTerminal(target, started);
+        }
+        const log = child_process_1.spawn('docker', ['logs', '-f', target]);
         log.stdout.on('data', d => {
             const lines = log_1.colorise(d.toString());
             process.stdout.write(lines);
         });
-        terminal_1.startTerminal();
+        AlreadyStarted = true;
     });
 }
 exports.viewLogs = viewLogs;

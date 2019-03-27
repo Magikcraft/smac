@@ -1,6 +1,6 @@
 {
     "name": "smac",
-    "version": "0.0.17",
+    "version": "0.0.18",
     "description": "Scriptcraft SMA Server controller",
     "main": "index.js",
     "bin": "./bin/smac",
@@ -8,22 +8,25 @@
         "test": "echo \"Nah, no tests\" && exit 0",
         "prepublishOnly": "tsc && cp bin/smac.js bin/smac"
     },
+    "smacConfig": {
+        "dockerTag": "0.1.5"
+    },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Magikcraft/scriptcraft-sma.git"
+        "url": "git+https://github.com/Magikcraft/smac.git"
     },
     "keywords": [
         "scriptcraft",
         "minecraft",
-        "scriptcraft-sma",
+        "smac",
         "magikcraft"
     ],
     "author": "Magikcraft.io",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/Magikcraft/scriptcraft-sma/issues"
+        "url": "https://github.com/Magikcraft/smac/issues"
     },
-    "homepage": "https://github.com/Magikcraft/scriptcraft-sma#readme",
+    "homepage": "https://github.com/Magikcraft/smac#readme",
     "husky": {
         "hooks": {
             "pre-commit": "tsc && cp bin/smac.js bin/smac && git add . && lint-staged"
