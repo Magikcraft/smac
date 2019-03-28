@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chalk_1 = __importDefault(require("chalk"));
 const ghetto_monad_1 = require("ghetto-monad");
 const docker = __importStar(require("../lib/docker"));
+const eula_1 = require("../lib/eula");
 const server_1 = require("../lib/server");
 const exit_1 = require("../lib/util/exit");
 const name_1 = require("../lib/util/name");
@@ -48,19 +49,19 @@ function startServer(serverTarget) {
         // installJavaPluginsIfNeeded()
         const data = yield status_1.getContainerStatus(target);
         if (!data.isError) {
-            if (data.value.Status === 'running') {
+            if (data.value.State.Status === 'running') {
                 console.log(`${target} is already running.`);
                 return exit_1.exit();
             }
-            if (data.value.Status === 'created') {
+            if (data.value.State.Status === 'created') {
                 console.log(`${target} has been created, but is not running. Trying waiting, or stopping it.`);
                 console.log(`If that doesn't work - check if this issue has been reported at https://github.com/Magikcraft/scriptcraft-sma/issues`);
                 return exit_1.exit();
             }
-            if (data.value.Status === 'exited') {
+            if (data.value.State.Status === 'exited') {
                 return stop_1.removeStoppedInstance(target);
             }
-            if (data.value.Status === 'paused') {
+            if (data.value.State.Status === 'paused') {
                 yield restartPausedContainer(target);
                 yield status_1.getStatus();
                 exit_1.exit();
@@ -80,14 +81,22 @@ function restartPausedContainer(name) {
 }
 function startNewInstance(name) {
     return __awaiter(this, void 0, void 0, function* () {
+        const eulaAccepted = yield eula_1.checkEula();
+        if (!eulaAccepted) {
+            console.log('Cannot continue without accepting the Minecraft EULA.');
+            exit_1.exit();
+            return new ghetto_monad_1.ErrorResult(new Error('Did not accept Minecraft EULA'));
+        }
+        console.log('Minecraft EULA accepted');
         const tag = yield server_1.server.getDockerTag();
         const port = yield server_1.server.getPort();
         const bind = yield server_1.server.getBindings(name);
         const env = yield server_1.server.getEnvironment();
         const rest = yield server_1.server.getRestConfig();
         const cache = `--mount source=sma-server-cache,target=/server/cache`;
+        const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`;
         try {
-            const dc = `run -d -p ${port}:25565 -p ${rest.port}:${rest.port} --name ${name} ${env} ${bind} ${cache} --restart always magikcraft/scriptcraft:${tag}`;
+            const dc = `run -d -p ${port}:25565 -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} --restart always magikcraft/scriptcraft:${tag}`;
             yield docker.command(dc);
             console.log(chalk_1.default.yellow(`Server ${name} started on localhost:${port}\n`));
             console.log('Start command:');

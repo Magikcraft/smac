@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import { spawn } from 'child_process'
 import { startTerminal } from '../lib/terminal'
 import { exit } from '../lib/util/exit'
@@ -30,14 +29,6 @@ export async function viewLogs({
     }
     console.log('Spawning log viewer')
     if (!AlreadyStarted) {
-        process.on('SIGINT', () => {
-            console.log(
-                chalk.yellow(`\n\nServer ${target} is still running. Use '`) +
-                    chalk.blue(`smac stop ${target}`) +
-                    chalk.yellow(' to stop it.')
-            )
-            exit(0)
-        })
         startTerminal(target, started)
     }
     const log = spawn('docker', ['logs', '-f', target])

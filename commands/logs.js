@@ -7,11 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const chalk_1 = __importDefault(require("chalk"));
 const child_process_1 = require("child_process");
 const terminal_1 = require("../lib/terminal");
 const exit_1 = require("../lib/util/exit");
@@ -40,12 +36,6 @@ function viewLogs({ serverTarget, started = false, } = {}) {
         }
         console.log('Spawning log viewer');
         if (!AlreadyStarted) {
-            process.on('SIGINT', () => {
-                console.log(chalk_1.default.yellow(`\n\nServer ${target} is still running. Use '`) +
-                    chalk_1.default.blue(`smac stop ${target}`) +
-                    chalk_1.default.yellow(' to stop it.'));
-                exit_1.exit(0);
-            });
             terminal_1.startTerminal(target, started);
         }
         const log = child_process_1.spawn('docker', ['logs', '-f', target]);

@@ -1,9 +1,12 @@
+import chalk from 'chalk'
 import { doUpdateCheck } from '../updateCheck'
 
-export async function exit(code = 0) {
-    if (code === 1) {
+export async function exit(target?: string) {
+    if (target) {
         console.log(
-            `No name specified, and no SMA Server package.json found in current directory.`
+            chalk.yellow(`\n\nServer ${target} is still running. Use '`) +
+                chalk.blue(`smac stop ${target}`) +
+                chalk.yellow(' to stop it.')
         )
     }
     await doUpdateCheck()
