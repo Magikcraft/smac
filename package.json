@@ -5,6 +5,7 @@
     "main": "index.js",
     "bin": "./bin/smac",
     "scripts": {
+        "dev": "gulp watch",
         "test": "echo \"Nah, no tests\" && exit 0",
         "prepublishOnly": "tsc && cp bin/smac.js bin/smac"
     },
@@ -39,19 +40,29 @@
         ]
     },
     "devDependencies": {
+        "@types/ansi-escapes": "^3.0.1",
+        "@types/axios": "^0.14.0",
+        "@types/extract-zip": "^1.6.2",
         "@types/fs-extra": "^5.0.5",
+        "@types/gulp": "^4.0.6",
+        "@types/gulp-batch": "^1.0.2",
+        "@types/gulp-copy": "0.0.4",
+        "@types/gulp-rename": "0.0.33",
+        "@types/gulp-typescript": "^2.13.0",
+        "@types/gulp-watch": "^4.1.34",
+        "@types/node": "^11.11.7",
+        "@types/progress": "^2.0.3",
+        "gulp": "^4.0.0",
+        "gulp-copy": "^4.0.1",
+        "gulp-rename": "^1.4.0",
+        "gulp-typescript": "^5.0.1",
         "husky": "^1.3.1",
         "lint-staged": "^8.1.5",
         "prettier": "^1.16.4",
         "prettierrc": "0.0.0-5",
-        "@types/axios": "^0.14.0",
-        "@types/extract-zip": "^1.6.2",
-        "@types/node": "^11.11.7",
-        "@types/progress": "^2.0.3"
+        "typescript": "^3.3.4000"
     },
     "dependencies": {
-        "@types/ansi-escapes": "^3.0.1",
-        "@types/gulp": "^4.0.6",
         "ansi-escapes": "^4.0.1",
         "axios": "^0.18.0",
         "chalk": "^2.4.2",
@@ -60,14 +71,11 @@
         "extract-zip": "^1.6.7",
         "fs-extra": "^7.0.1",
         "ghetto-monad": "^2.1.2",
-        "gulp": "^4.0.0",
-        "gulp-typescript": "^5.0.1",
         "progress": "^2.0.3",
         "prompt": "^1.0.0",
         "request-progress": "^3.0.0",
         "sillyname": "^0.1.0",
         "spawn-npm-install": "^1.2.0",
-        "typescript": "^3.3.4000",
         "update-check": "^1.5.3"
     }
 }
