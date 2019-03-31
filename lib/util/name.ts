@@ -21,8 +21,9 @@ export async function hintRunningContainers() {
 }
 export async function getTargetForCommand({
     includeRunningContainer = true,
+    options = {} as any,
 } = {}) {
-    const serverTarget = process.argv[3]
+    const serverTarget = options.profile
     if (serverTarget) {
         return new Result(serverTarget)
     }

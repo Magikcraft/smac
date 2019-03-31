@@ -13,19 +13,35 @@ if (!docker.isDockerInstalled) {
     process.exit(1)
 }
 
-const command = process.argv[2]
+/* first - parse the main command */
+const mainDefinitions = [{ name: 'command', defaultOption: true }]
+const mainOptions = commandLineArgs(mainDefinitions, {
+    stopAtFirstUnknown: true,
+})
+const argv = mainOptions._unknown || []
 
-if (!command || !commandMap[command]) {
-    commands.printHelp()
-    exit()
-}
+console.log('mainOptions\n===========')
+console.log(mainOptions)
 
-processCommand(command)
+/* second - parse the start command options */
+if (mainOptions.command === commandMap.start.name) {
+    const startDefinitions = commandMap.start.startDefinitions
+    const startOptions = commandLineArgs(startDefinitions, { argv })
 
-export function processCommand(command: string, target?: string) {
-    if (command === commandMap.start.name) {
-        commands.startServer()
+    console.log('\nstartOptions\n============')
+    console.log(startOptions)
+    commands.startServer(startOptions)
+} else {
+    const command = process.argv[2]
+
+    if (!command || !commandMap[command]) {
+        commands.printHelp()
+        exit()
     }
+
+    processCommand(command)
+}
+export function processCommand(command: string, target?: string) {
     if (command === commandMap.stop.name) {
         commands.stopServer()
     }

@@ -2,6 +2,18 @@ export const commandMap = {
     start: {
         description: 'Start a server',
         name: 'start',
+        startDefinitions: [
+            {
+                name: 'test',
+                alias: 't',
+                type: Boolean,
+            },
+            {
+                name: 'profile',
+                alias: 'p',
+                type: String,
+            },
+        ],
     },
 
     stop: {

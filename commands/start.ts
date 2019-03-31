@@ -10,13 +10,14 @@ import { viewLogs } from './logs'
 import { getContainerStatus, getStatus } from './status'
 import { removeStoppedInstance } from './stop'
 
-export async function startServer(serverTarget?: string) {
+export async function startServer(options: any) {
     let target: string
-    if (serverTarget) {
-        target = serverTarget
+    if (options.profile) {
+        target = options.profile
     } else {
         const name = await getTargetForCommand({
             includeRunningContainer: false,
+            options,
         })
         if (name.isNothing) {
             console.log(
@@ -54,7 +55,7 @@ export async function startServer(serverTarget?: string) {
         }
     }
     console.log(`Starting ${target}`)
-    const result = await startNewInstance(target)
+    const result = await startNewInstance(target, options)
     if (!result.isError) {
         viewLogs({ serverTarget: target, started: true })
     }
@@ -65,7 +66,7 @@ function restartPausedContainer(name: string) {
     return docker.command(`unpause ${name}`)
 }
 
-async function startNewInstance(name: string) {
+async function startNewInstance(name: string, options: any) {
     const eulaAccepted = await checkEula()
     if (!eulaAccepted) {
         console.log('Cannot continue without accepting the Minecraft EULA.')
@@ -80,7 +81,7 @@ async function startNewInstance(name: string) {
     const rest = await server.getRestConfig()
     const cache = `--mount source=sma-server-cache,target=${dockerServerRoot}/cache`
     const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`
-    const testMode = `-e TEST_MODE=true`
+    const testMode = options.test ? `-e TEST_MODE=true` : ''
     try {
         const dc = `run -d -p ${port}:25565 -p ${rest.port}:${
             rest.port
@@ -89,12 +90,7 @@ async function startNewInstance(name: string) {
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)
         )
-        console.log('Start command:')
-        const startCommand = dc
-            .split('--')
-            .map(s => `${s} \\`)
-            .join('\n\t--')
-        console.log(chalk.gray(startCommand))
+        logOutCommand(dc)
         return new Result(true)
     } catch (e) {
         console.log('There was an error starting the server!')
@@ -109,4 +105,15 @@ async function startNewInstance(name: string) {
         )
         return new ErrorResult(new Error())
     }
+}
+
+function logOutCommand(dc: string) {
+    console.log('Start command:')
+    const startCommand = dc.split('--')
+
+    const final = startCommand.pop() || ''
+    const initialLines = startCommand.map(s => `${s} \\`).join('\n\t--')
+
+    const finalLine = final ? `\n\t ${final}` : ''
+    console.log(chalk.gray(`${initialLines}${finalLine}`))
 }
