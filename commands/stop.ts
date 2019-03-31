@@ -28,6 +28,7 @@ export async function stopServer(serverTarget?: string) {
 
     await stopRunningInstance(target)
     await removeStoppedInstance(target)
+    return exit()
 }
 
 async function stopRunningInstance(name: string) {

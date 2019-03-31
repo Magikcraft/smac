@@ -1,113 +1,54 @@
-import ansiEscapes from 'ansi-escapes'
 import axios from 'axios'
-import prompt from 'prompt'
-import { startServer, stopServer } from '../commands'
-import { commandMap as commands } from '../commands/commandMap.'
+import * as inquirer from 'inquirer'
+import { processCommand } from '../bin/smac'
 import { server } from './server'
+import { SignalRef } from './SignalRef'
+import { CustomStd } from './stdout'
 import { exit } from './util/exit'
+import { CommandPrompt } from './util/inquirer-command-prompt'
 
-export function startTerminal(serverTarget: string, started = false) {
-    const schema = {
-        properties: {
-            command: {
-                description: 'Command >',
-                default: '',
-                type: 'string',
-                required: true,
-            },
+let previousLine: string = ''
+
+const promptStdout = CustomStd('prompt') // Not working with inquirer and command history, yet
+
+const prompt = inquirer.createPromptModule({
+    output: process.stdout, //promptStdout,
+})
+const commandPromptWithHistory = prompt.registerPrompt(
+    'command',
+    CommandPrompt as any
+)
+
+export async function startTerminal(serverTarget: string, started = false) {
+    // Workaround for https://github.com/SBoudrias/Inquirer.js/issues/293#issuecomment-422890996
+    new SignalRef('SIGINT', async () => await exit(serverTarget))
+    while (true) {
+        await inquire(serverTarget, started)
+    }
+}
+
+async function inquire(serverTarget, started) {
+    const answers = await prompt<{ cmd: string }>([
+        {
+            type: 'command',
+            name: 'cmd',
+            message: '>',
+            // optional
+            autoCompletion: ['js', 'smac', 'mv', 'help', 'smac stop'],
+            context: 0,
+            short: false,
+            default: previousLine,
         },
-    }
-    prompt.message = ''
-    prompt.start()
-    prompt.get(schema, function(err, result) {
-        console.log(result)
-        if (result && result.command) {
-            const command = result.command
-            const isSmacCommand = command.indexOf('smac ') === 0
-            if (isSmacCommand) {
-                return processSmacCommand(
-                    command.split('smac ')[1],
-                    serverTarget,
-                    started
-                )
-            } else sendCommand(command)
-        }
-        startTerminal(serverTarget, started)
-    })
-}
-
-export function _startTerminal(serverTarget: string, started = false) {
-    const readline = require('readline')
-    let line
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: false,
-    })
-    if (process.stdin.isTTY) {
-        process.stdin.setRawMode!(true)
-    }
-
-    readline.emitKeypressEvents(process.stdin, rl)
-    process.stdin.on('keypress', (str, key) => {
-        if (key.ctrl && key.name === 'c') {
-            exit(serverTarget)
-        } else if (key.name === 'left') {
-            process.stdout.write(
-                ansiEscapes.cursorBackward() + ansiEscapes.cursorLeft
-            )
-        } else if (key.name === 'right') {
-            process.stdout.write(ansiEscapes.cursorForward())
-        } else if (key.name === 'return') {
-            const isSmacCommand = line.indexOf('smac ') === 0
-            if (isSmacCommand) {
-                return processSmacCommand(
-                    line.split('smac ')[1],
-                    serverTarget,
-                    started
-                )
-            } else sendCommand(line)
-        } else {
-            process.stdout.write(str)
-            line += str
-        }
-        // console.log(key)
-    })
-
-    rl.on('line', function(line) {
-        const isSmacCommand = line.indexOf('smac ') === 0
+    ] as any)
+    if (answers && answers.cmd) {
+        const command = answers.cmd
+        const isSmacCommand =
+            command.indexOf('smac ') === 0 ||
+            (command.indexOf('smac') === 0 && command.length === 4)
         if (isSmacCommand) {
-            return processSmacCommand(
-                line.split('smac ')[1],
-                serverTarget,
-                started
-            )
-        } else sendCommand(line)
-    })
-}
-
-async function processSmacCommand(
-    command: string,
-    target: string,
-    started: boolean
-) {
-    if (command === commands.stop.name) {
-        await stopServer(target)
-        return exit()
-    }
-    /* Need to handle `smac logs` from a different dir
-        So, write a JSON config when starting
-    */
-    if (command === commands.restart.name) {
-        await stopServer(target)
-        if (started) {
-            await startServer(target)
-        } else {
-            console.log(
-                'Cannot reliably restart server from log command. Restart it manually.'
-            )
-            exit()
-        }
+            processCommand(command.split('smac ')[1], serverTarget)
+        } else sendCommand(command)
+        previousLine = command
     }
 }
 

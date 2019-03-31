@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+const commandLineArgs = require('command-line-args')
+
 import * as commands from '../commands'
-import { commandMap } from '../commands/commandMap.'
+import { commandMap } from '../commands/commandMap'
 import * as docker from '../lib/docker'
 import { exit } from '../lib/util/exit'
 
@@ -20,7 +22,7 @@ if (!command || !commandMap[command]) {
 
 processCommand(command)
 
-function processCommand(command) {
+export function processCommand(command: string, target?: string) {
     if (command === commandMap.start.name) {
         commands.startServer()
     }
@@ -34,9 +36,15 @@ function processCommand(command) {
         commands.listContainers()
     }
     if (command === commandMap.info.name) {
-        commands.inspectContainer()
+        commands.inspectContainer(target)
     }
     if (command === commandMap.logs.name) {
-        commands.viewLogs()
+        if (!target) {
+            // do not allow to be run from log viewer terminal
+            commands.viewLogs()
+        }
+    }
+    if (!command || !commandMap[command]) {
+        commands.printHelp()
     }
 }

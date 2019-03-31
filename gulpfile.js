@@ -3,7 +3,7 @@ const ts = require('gulp-typescript')
 const tsProject = ts.createProject('tsconfig.json')
 const rename = require('gulp-rename')
 gulp.task('typescript', function() {
-    console.log('Typescript')
+    console.log('Compiling TypeScript...')
     return gulp
         .src(['**/*.ts', '!node_modules/**']) // or tsProject.src()
         .pipe(tsProject())

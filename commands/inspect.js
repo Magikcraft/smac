@@ -19,25 +19,27 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chalk_1 = __importDefault(require("chalk"));
+const ghetto_monad_1 = require("ghetto-monad");
 const process_1 = require("process");
 const docker = __importStar(require("../lib/docker"));
 const name_1 = require("../lib/util/name");
 const status_1 = require("./status");
-function inspectContainer() {
+function inspectContainer(serverTarget) {
     return __awaiter(this, void 0, void 0, function* () {
-        let name = yield name_1.getTargetForCommand();
+        const name = new ghetto_monad_1.Result(serverTarget) || (yield name_1.getTargetForCommand());
         if (name.isNothing) {
             yield name_1.hintRunningContainers();
             return process_1.exit();
         }
-        const status = yield status_1.getContainerStatus(name.value);
+        const target = name.value;
+        const status = yield status_1.getContainerStatus(target);
         if (status.isError) {
             console.log(status.error.message);
             return process_1.exit(0);
         }
-        console.log(chalk_1.default.blue(`${name.value}:`));
+        console.log(chalk_1.default.blue(`${target}:`));
         console.log(status.value);
-        const data = yield docker.command(`inspect ${name.value}`);
+        const data = yield docker.command(`inspect ${target}`);
         // console.log(data.object[0].State)
         console.log(chalk_1.default.blue('Container Mounts:'));
         console.log(data.object[0].Mounts);
@@ -47,3 +49,4 @@ function inspectContainer() {
     });
 }
 exports.inspectContainer = inspectContainer;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zcGVjdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbImluc3BlY3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxrREFBeUI7QUFDekIsK0NBQXFDO0FBQ3JDLHFDQUE4QjtBQUM5QixzREFBdUM7QUFDdkMsMkNBQTZFO0FBQzdFLHFDQUE2QztBQUU3QyxTQUFzQixnQkFBZ0IsQ0FBQyxZQUFZOztRQUMvQyxNQUFNLElBQUksR0FBRyxJQUFJLHFCQUFNLENBQUMsWUFBWSxDQUFDLElBQUksQ0FBQyxNQUFNLDBCQUFtQixFQUFFLENBQUMsQ0FBQTtRQUN0RSxJQUFJLElBQUksQ0FBQyxTQUFTLEVBQUU7WUFDaEIsTUFBTSw0QkFBcUIsRUFBRSxDQUFBO1lBQzdCLE9BQU8sY0FBSSxFQUFFLENBQUE7U0FDaEI7UUFDRCxNQUFNLE1BQU0sR0FBRyxJQUFJLENBQUMsS0FBSyxDQUFBO1FBQ3pCLE1BQU0sTUFBTSxHQUFHLE1BQU0sMkJBQWtCLENBQUMsTUFBTSxDQUFDLENBQUE7UUFDL0MsSUFBSSxNQUFNLENBQUMsT0FBTyxFQUFFO1lBQ2hCLE9BQU8sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FBQyxPQUFPLENBQUMsQ0FBQTtZQUNqQyxPQUFPLGNBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQTtTQUNqQjtRQUNELE9BQU8sQ0FBQyxHQUFHLENBQUMsZUFBSyxDQUFDLElBQUksQ0FBQyxHQUFHLE1BQU0sR0FBRyxDQUFDLENBQUMsQ0FBQTtRQUNyQyxPQUFPLENBQUMsR0FBRyxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQUMsQ0FBQTtRQUN6QixNQUFNLElBQUksR0FBRyxNQUFNLE1BQU0sQ0FBQyxPQUFPLENBQUMsV0FBVyxNQUFNLEVBQUUsQ0FBQyxDQUFBO1FBQ3RELG9DQUFvQztRQUNwQyxPQUFPLENBQUMsR0FBRyxDQUFDLGVBQUssQ0FBQyxJQUFJLENBQUMsbUJBQW1CLENBQUMsQ0FBQyxDQUFBO1FBQzVDLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxNQUFNLENBQUMsQ0FBQTtRQUNsQyxPQUFPLENBQUMsR0FBRyxDQUFDLGVBQUssQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDLENBQUMsQ0FBQTtRQUNuQyxPQUFPLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFDLENBQUMsZUFBZSxDQUFDLEtBQUssQ0FBQyxDQUFBO1FBQ2pELGNBQUksRUFBRSxDQUFBO0lBQ1YsQ0FBQztDQUFBO0FBckJELDRDQXFCQyJ9

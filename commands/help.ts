@@ -1,6 +1,6 @@
 import columnify from 'columnify'
 import { header, version } from '../lib/util/version'
-import { commandMap } from './commandMap.'
+import { commandMap } from './commandMap'
 
 export function printHelp() {
     console.log(header)

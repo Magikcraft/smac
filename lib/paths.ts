@@ -1,6 +1,8 @@
 import { homedir } from 'os'
 import * as path from 'path'
 
+export const dockerServerRoot = `/_server_`
+
 const home = homedir()
 
 const cwd = process.cwd()

@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import { CustomStd } from '../lib/stdout'
 import { startTerminal } from '../lib/terminal'
 import { exit } from '../lib/util/exit'
 import { colorise } from '../lib/util/log'
@@ -6,7 +7,7 @@ import { getTargetForCommand, hintRunningContainers } from '../lib/util/name'
 import { getContainerStatus } from './status'
 
 let AlreadyStarted = false
-
+const stdout = CustomStd()
 export async function viewLogs({
     serverTarget,
     started = false,
@@ -25,7 +26,7 @@ export async function viewLogs({
     const isRunning = await getContainerStatus(target)
     if (isRunning.isError) {
         console.log(isRunning.error.message)
-        exit()
+        return exit()
     }
     console.log('Spawning log viewer')
     if (!AlreadyStarted) {
@@ -35,7 +36,7 @@ export async function viewLogs({
 
     log.stdout!.on('data', d => {
         const lines = colorise(d.toString())
-        process.stdout.write(lines)
+        stdout.write(lines)
     })
     AlreadyStarted = true
 }

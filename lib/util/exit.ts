@@ -5,10 +5,12 @@ export async function exit(target?: string) {
     if (target) {
         console.log(
             chalk.yellow(`\n\nServer ${target} is still running. Use '`) +
-                chalk.blue(`smac stop ${target}`) +
+                chalk.blue(`smac stop ${target}'`) +
                 chalk.yellow(' to stop it.')
         )
+
+        console.log('')
     }
     await doUpdateCheck()
-    process.exit()
+    process.exit(0)
 }
