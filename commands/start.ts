@@ -57,7 +57,7 @@ export async function startServer(options: any) {
     console.log(`Starting ${target}`)
     const result = await startNewInstance(target, options)
     if (!result.isError) {
-        viewLogs({ serverTarget: target, started: true })
+        viewLogs({ serverTarget: target, started: true, options })
     }
 }
 
@@ -114,6 +114,6 @@ function logOutCommand(dc: string) {
     const final = startCommand.pop() || ''
     const initialLines = startCommand.map(s => `${s} \\`).join('\n\t--')
 
-    const finalLine = final ? `\n\t ${final}` : ''
+    const finalLine = final ? `\n\t --${final}` : ''
     console.log(chalk.gray(`${initialLines}${finalLine}`))
 }

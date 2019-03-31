@@ -5,13 +5,15 @@ import { exit } from '../lib/util/exit'
 import { colorise } from '../lib/util/log'
 import { getTargetForCommand, hintRunningContainers } from '../lib/util/name'
 import { getContainerStatus } from './status'
+import { stopServer } from './stop'
 
 let AlreadyStarted = false
 const stdout = CustomStd()
 export async function viewLogs({
     serverTarget,
     started = false,
-}: { serverTarget?: string; started?: boolean } = {}) {
+    options = {},
+}: { serverTarget?: string; started?: boolean; options?: any } = {}) {
     let target: string
     if (serverTarget) {
         target = serverTarget
@@ -34,9 +36,26 @@ export async function viewLogs({
     }
     const log = spawn('docker', ['logs', '-f', target])
 
+    let testsFailed = false
+
     log.stdout!.on('data', d => {
         const lines = colorise(d.toString())
         stdout.write(lines)
+        if (lines.indexOf('Some Jasmine tests have failed.')) {
+            testsFailed = true
+        }
+
+        // Shut down the container and exit with a code based on the test results
+        // when we were started with -t -e
+        if (options && options.test && options.exit) {
+            if (lines.indexOf('All tests are now complete.') != -1) {
+                if (testsFailed) {
+                    stopServer().then(() => process.exit(1))
+                } else {
+                    stopServer().then(() => process.exit(0))
+                }
+            }
+        }
     })
     AlreadyStarted = true
 }

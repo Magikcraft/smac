@@ -3,7 +3,7 @@ import * as fs from 'fs-extra'
 import { Maybe, Nothing, Result } from 'ghetto-monad'
 import * as path from 'path'
 import * as docker from './docker'
-import { localPath, localWorldsPath, pluginsPath } from './paths'
+import { localPath, localWorldsPath } from './paths'
 import { World } from './worlds'
 
 class Server {
@@ -29,15 +29,13 @@ class Server {
 
     async getBindings(name) {
         const worlds = await this.getWorldMounts()
-        const nodeModules = fs.existsSync(pluginsPath())
-            ? docker.makeMount(pluginsPath(), 'scriptcraft-plugins')
-            : ''
+
         const bindings = (await this.getCustomBindings())
             .map(({ src, dst }) => docker.makeMount(localPath(src), dst))
             .join(' ')
         console.log('Found bindings in config:')
         console.log(bindings)
-        return `${worlds} ${nodeModules} ${bindings}`
+        return `${worlds} ${bindings}`
     }
 
     private async getWorldMounts() {

@@ -20,16 +20,16 @@ const mainOptions = commandLineArgs(mainDefinitions, {
 })
 const argv = mainOptions._unknown || []
 
-console.log('mainOptions\n===========')
-console.log(mainOptions)
+// console.log('mainOptions\n===========')
+// console.log(mainOptions)
 
 /* second - parse the start command options */
 if (mainOptions.command === commandMap.start.name) {
     const startDefinitions = commandMap.start.startDefinitions
     const startOptions = commandLineArgs(startDefinitions, { argv })
 
-    console.log('\nstartOptions\n============')
-    console.log(startOptions)
+    // console.log('\nstartOptions\n============')
+    // console.log(startOptions)
     commands.startServer(startOptions)
 } else {
     const command = process.argv[2]
@@ -37,9 +37,7 @@ if (mainOptions.command === commandMap.start.name) {
     if (!command || !commandMap[command]) {
         commands.printHelp()
         exit()
-    }
-
-    processCommand(command)
+    } else processCommand(command)
 }
 export function processCommand(command: string, target?: string) {
     if (command === commandMap.stop.name) {

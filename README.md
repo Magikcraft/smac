@@ -31,6 +31,42 @@ list    List running SMA servers
 inspect Inspect a running server
 ```
 
+## Terminal
+
+When the logs are streaming - either from the `start` command or the `logs` command - you have an interactive terminal that pipes your commands to the server.
+
+This is slightly different from typing directly at the server console of a running server. What you type here is sent to the server over HTTP and executed asynchronously as the Console Sender.
+
+You can execute arbitrary javascript using the `js` command, for example:
+
+```
+js refresh()
+```
+
+There are two additional commands that the terminal supports:
+
+-   `smac` - smac stop is supported to allow you to stop the server from the terminal.
+-   `ts` - execute arbitrary TypeScript. The code that follows this command is transpiled to ES5 and sent to the server with `js`.
+    For example:
+
+```
+ts [1,2,3].map(i => i+1)
+```
+
+Is transpiled to:
+
+```javascript
+;[1, 2, 3].map(function(i) {
+    return i + 1
+})
+```
+
+Resulting in:
+
+```
+? > (ts [1,2,3].map(i => i+1)) [05:57:40 INFO]: [MinecraftRESTConsole] server remote executes js [1, 2, 3].map(function (i) { return i + 1; });
+```
+
 ## Generate config
 
 Use the [sma-server Yeoman generator](https://github.com/Magikcraft/generator-sma-server) to generate a configuration.

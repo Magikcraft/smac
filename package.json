@@ -50,6 +50,8 @@
         "@types/gulp-rename": "0.0.33",
         "@types/gulp-typescript": "^2.13.0",
         "@types/gulp-watch": "^4.1.34",
+        "@types/command-line-args": "^5.0.0",
+        "@types/inquirer": "^6.0.0",
         "@types/node": "^11.11.7",
         "@types/progress": "^2.0.3",
         "gulp": "^4.0.0",
@@ -60,11 +62,9 @@
         "lint-staged": "^8.1.5",
         "prettier": "^1.16.4",
         "prettierrc": "0.0.0-5",
-        "typescript": "^3.3.4000"
+        "typescript": "^3.4.1"
     },
     "dependencies": {
-        "@types/command-line-args": "^5.0.0",
-        "@types/inquirer": "^6.0.0",
         "ansi-escapes": "^4.0.1",
         "axios": "^0.18.0",
         "chalk": "^2.4.2",
@@ -82,6 +82,7 @@
         "request-progress": "^3.0.0",
         "sillyname": "^0.1.0",
         "spawn-npm-install": "^1.2.0",
+        "typescript-simple": "^8.0.6",
         "update-check": "^1.5.3"
     }
 }

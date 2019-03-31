@@ -13,6 +13,12 @@ export const commandMap = {
                 alias: 'p',
                 type: String,
             },
+            {
+                name: 'exit',
+                alias: 'e',
+                description: 'Exit after test completion',
+                type: Boolean,
+            },
         ],
     },
 
