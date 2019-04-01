@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 const commandLineArgs = require('command-line-args')
 
+import * as fs from 'fs-extra'
 import * as commands from '../commands'
 import { commandMap } from '../commands/commandMap'
 import * as docker from '../lib/docker'
+import { smaPath } from '../lib/paths'
 import { exit } from '../lib/util/exit'
+
+if (!fs.existsSync(smaPath('./'))) fs.mkdirpSync(smaPath('./'))
 
 if (!docker.isDockerInstalled) {
     console.log(
