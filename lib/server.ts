@@ -3,19 +3,31 @@ import * as fs from 'fs-extra'
 import { Maybe, Nothing, Result } from 'ghetto-monad'
 import * as path from 'path'
 import * as docker from './docker'
+import { Binder } from './docker'
 import { localPath, localWorldsPath } from './paths'
 import { World } from './worlds'
 
+type ServerType = 'bukkit' | 'nukkit'
+
 class Server {
-    static defaultPort = 25565
+    static defaultServerType: ServerType = 'bukkit'
+    static defaultPort = {
+        bukkit: 25565,
+        nukkit: 19132,
+    }
     static defaultDockerTag = 'latest'
     static defaultMemory = 2048
     static restPort = 8086
     static restPassword = 'INSECURE'
-    serverConfig: Promise<Maybe<Result<SMAServerConfig>>>
+    static defaultDockerImage = 'magikcraft/scriptcraft'
+
+    private serverConfig!: Promise<Maybe<Result<SMAServerConfig>>>
+    binder: docker.Binder
+    filename = 'package.json'
+    serverType!: ServerType
 
     constructor() {
-        this.serverConfig = this.getServerConfig()
+        this.binder = new Binder()
     }
 
     async getServerTargetFromPackageJson() {
@@ -27,15 +39,56 @@ class Server {
         }
     }
 
+    async getNodeModulesBinding() {
+        const conf = await this.getServerConfig()
+        if (conf.isNothing) {
+            return new Nothing()
+        } else {
+            console.log(`Bind node_modules: ${conf.value.node_modules}`)
+            return new Result(conf.value.node_modules)
+        }
+    }
+
+    createNodeModuleBindings() {
+        const modules = fs.readdirSync('node_modules')
+        const nsPackage = m => {
+            const isNamespacedPackage = m && m.indexOf('@') === 0
+            if (isNamespacedPackage) {
+                const pkgs = fs.readdirSync(`node_modules/${m}`)
+                return pkgs
+                    .map(p =>
+                        this.binder.makeMount(
+                            localPath(`node_modules/${m}/${p}`),
+                            `scriptcraft-plugins/${m}/${p}`
+                        )
+                    )
+                    .join(' ')
+            }
+            return this.binder.makeMount(
+                localPath(`node_modules/${m}`),
+                `scriptcraft-plugins/${m}`
+            )
+        }
+        if (modules.length > 0) {
+            return modules.map(nsPackage).join(' ')
+        }
+        return ''
+    }
+
     async getBindings(name) {
         const worlds = await this.getWorldMounts()
 
         const bindings = (await this.getCustomBindings())
-            .map(({ src, dst }) => docker.makeMount(localPath(src), dst))
+            .map(({ src, dst }) => this.binder.makeMount(localPath(src), dst))
             .join(' ')
+        const mountNodeModules = await this.getNodeModulesBinding()
+        const nodeModules =
+            !mountNodeModules.isNothing && mountNodeModules.value
+                ? this.createNodeModuleBindings()
+                : ``
         console.log('Found bindings in config:')
         console.log(bindings)
-        return `${worlds} ${bindings}`
+        return `${worlds} ${bindings} ${nodeModules}`
     }
 
     private async getWorldMounts() {
@@ -81,7 +134,10 @@ class Server {
         return Object.keys(allMounts)
             .map(m => {
                 console.log(allMounts[m])
-                const r = docker.makeMount(allMounts[m].src, allMounts[m].dst)
+                const r = this.binder.makeMount(
+                    allMounts[m].src,
+                    allMounts[m].dst
+                )
                 return r
             })
             .join(' ')
@@ -110,7 +166,7 @@ class Server {
             src: `${path}/${name}`,
             dst: `worlds/${name}`,
         })
-        console.log('Checking world definitions in package.json')
+        console.log(`Checking world definitions in ${this.filename}`)
         const worldDefs = await this.getWorldDefinitions()
         if (worldDefs.isNothing) {
             console.log('None found.')
@@ -149,10 +205,35 @@ class Server {
         }
     }
 
-    async getPort() {
+    async getServerType() {
+        const conf = await this.getServerConfig()
+        if (conf.isNothing || !conf.value.serverType) {
+            return Server.defaultServerType
+        } else {
+            return conf.value.serverType
+        }
+    }
+
+    async getDockerImage() {
+        const serverType = await this.getServerType()
+        if (serverType === 'bukkit') {
+            return docker.images.bukkit
+        }
+        if (serverType === 'nukkit') {
+            return docker.images.nukkit
+        }
+        return docker.images.bukkit
+    }
+
+    async getContainerPort() {
+        const serverType = await this.getServerType()
+        return Server.defaultPort[serverType]
+    }
+
+    async getExposedPort() {
         const conf = await this.getServerConfig()
         if (conf.isNothing || !conf.value.port) {
-            return Server.defaultPort
+            return this.getContainerPort()
         } else {
             return conf.value.port
         }
@@ -205,14 +286,20 @@ class Server {
             return this.serverConfig
         }
         const cwd = process.cwd()
-        const pkgPath = path.join(cwd, 'package.json')
+        const pkgPath = path.join(cwd, this.filename)
         if (!fs.existsSync(pkgPath)) {
+            this.serverConfig = Promise.resolve(new Nothing())
             return new Nothing()
         }
         const md = await import(pkgPath)
         if (!md.smaServerConfig) {
+            this.serverConfig = Promise.resolve(new Nothing())
             return new Nothing()
         }
+        this.serverConfig = Promise.resolve(
+            new Result<SMAServerConfig>(md.smaServerConfig)
+        )
+
         return new Result<SMAServerConfig>(md.smaServerConfig)
     }
 
@@ -229,14 +316,16 @@ class Server {
 export const server = new Server()
 
 export interface SMAServerConfig {
-    dockerTag: string
-    port: string
+    dockerTag: string // default: 'latest'
+    serverType: ServerType // default: 'bukkit'
+    port: string // default: 25565
     serverName: string
     worlds: WorldDefinition[]
     javaPlugins: string[]
     bind: { src: string; dst: string }[]
     memory: number
     restEndpoint: RestConfig
+    node_modules: boolean
 }
 
 export interface RestConfig {

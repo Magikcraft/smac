@@ -15,7 +15,7 @@ export const localWorldsPath = () => localPath('worlds')
 
 export const smaWorldsPath = () => smaPath('worlds')
 
-export const localWorldPath = path => `${localWorldsPath()}/${path}`
-export const smaWorldPath = path => `${smaWorldsPath()}/${path}`
+export const localWorldPath = p => path.join(localWorldsPath(), p)
+export const smaWorldPath = p => path.join(smaWorldsPath(), p)
 
 export const pluginsPath = () => localPath('node_modules')

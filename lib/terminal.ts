@@ -53,7 +53,7 @@ async function inquire(serverTarget, started) {
         },
     ] as any)
     if (answers && answers.cmd) {
-        const command = answers.cmd
+        const command = (answers.cmd || '').trimLeft()
         const isTSCommand = command.indexOf(`ts `) === 0
         const isSmacCommand =
             command.indexOf('smac ') === 0 ||
@@ -81,7 +81,7 @@ async function sendCommand(command: string) {
         rest.password
     }`
     try {
-        axios.get(url)
+        await axios.get(url)
     } catch (error) {
         console.log(`The call to ${url} failed with error: ${error}`)
         return false

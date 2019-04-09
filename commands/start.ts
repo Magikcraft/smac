@@ -15,6 +15,9 @@ export async function startServer(options: any) {
     if (options.profile) {
         target = options.profile
     } else {
+        console.log(options)
+        const filename = options.file || 'package.json'
+        server.filename = filename
         const name = await getTargetForCommand({
             includeRunningContainer: false,
             options,
@@ -75,17 +78,19 @@ async function startNewInstance(name: string, options: any) {
     }
     console.log('Minecraft EULA accepted')
     const tag = await server.getDockerTag()
-    const port = await server.getPort()
+    const port = await server.getExposedPort()
+    const containerPort = await server.getContainerPort()
     const bind = await server.getBindings(name)
     const env = await server.getEnvironment()
     const rest = await server.getRestConfig()
     const cache = `--mount source=sma-server-cache,target=${dockerServerRoot}/cache`
     const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`
     const testMode = options.test ? `-e TEST_MODE=true` : ''
+    const dockerImage = await server.getDockerImage()
     try {
-        const dc = `run -d -p ${port}:25565 -p ${rest.port}:${
+        const dc = `run -d -p ${port}:${containerPort} -p ${rest.port}:${
             rest.port
-        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always magikcraft/scriptcraft:${tag}`
+        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always ${dockerImage}:${tag}`
         await docker.command(dc)
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)

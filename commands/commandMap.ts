@@ -19,6 +19,12 @@ export const commandMap = {
                 description: 'Exit after test completion',
                 type: Boolean,
             },
+            {
+                name: 'file',
+                alias: 'f',
+                description: 'JSON definition file to use',
+                type: String,
+            },
         ],
     },
 
