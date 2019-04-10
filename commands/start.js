@@ -93,16 +93,21 @@ function startNewInstance(name, options) {
             return new ghetto_monad_1.ErrorResult(new Error('Did not accept Minecraft EULA'));
         }
         console.log('Minecraft EULA accepted');
+        const serverType = yield server_1.server.getServerType();
         const tag = yield server_1.server.getDockerTag();
         const port = yield server_1.server.getExposedPort();
-        const containerPort = yield server_1.server.getContainerPort();
+        let containerPort = yield server_1.server.getContainerPort();
         const bind = yield server_1.server.getBindings(name);
         const env = yield server_1.server.getEnvironment();
         const rest = yield server_1.server.getRestConfig();
         const cache = `--mount source=sma-server-cache,target=${paths_1.dockerServerRoot}/cache`;
         const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`;
-        const testMode = options.test ? `-e TEST_MODE=true` : '';
+        const testMode = options.test || (yield server_1.server.getTestMode()) ? `-e TEST_MODE=true` : '';
         const dockerImage = yield server_1.server.getDockerImage();
+        console.log(`Starting ${serverType} server on port ${port}...`);
+        if (serverType === 'nukkit') {
+            containerPort += '/udp';
+        }
         try {
             const dc = `run -d -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always ${dockerImage}:${tag}`;
             yield docker.command(dc);

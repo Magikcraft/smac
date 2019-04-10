@@ -106,3 +106,15 @@ I have this subkey in my server's `package.json`:
   ]
 }
 ```
+
+## Development
+
+To dev on this utility, run:
+
+```bash
+npm i
+npm link
+npm run dev
+```
+
+This will link your checkout to the global `smac` command, and start a compiling watcher that transpiles changes and updates the linked binary.

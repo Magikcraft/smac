@@ -77,16 +77,23 @@ async function startNewInstance(name: string, options: any) {
         return new ErrorResult(new Error('Did not accept Minecraft EULA'))
     }
     console.log('Minecraft EULA accepted')
+    const serverType = await server.getServerType()
     const tag = await server.getDockerTag()
     const port = await server.getExposedPort()
-    const containerPort = await server.getContainerPort()
+    let containerPort = await server.getContainerPort()
     const bind = await server.getBindings(name)
     const env = await server.getEnvironment()
     const rest = await server.getRestConfig()
     const cache = `--mount source=sma-server-cache,target=${dockerServerRoot}/cache`
     const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`
-    const testMode = options.test ? `-e TEST_MODE=true` : ''
+    const testMode =
+        options.test || (await server.getTestMode()) ? `-e TEST_MODE=true` : ''
     const dockerImage = await server.getDockerImage()
+
+    console.log(`Starting ${serverType} server on port ${port}...`)
+    if (serverType === 'nukkit') {
+        containerPort += '/udp'
+    }
     try {
         const dc = `run -d -p ${port}:${containerPort} -p ${rest.port}:${
             rest.port

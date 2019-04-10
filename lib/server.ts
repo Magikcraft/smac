@@ -5,15 +5,16 @@ import * as path from 'path'
 import * as docker from './docker'
 import { Binder } from './docker'
 import { localPath, localWorldsPath } from './paths'
+import { RestConfig, SMAServerConfig } from './SMAServerConfig'
 import { World } from './worlds'
 
-type ServerType = 'bukkit' | 'nukkit'
+export type ServerType = 'bukkit' | 'nukkit'
 
 class Server {
     static defaultServerType: ServerType = 'bukkit'
     static defaultPort = {
-        bukkit: 25565,
-        nukkit: 19132,
+        bukkit: '25565',
+        nukkit: '19132',
     }
     static defaultDockerTag = 'latest'
     static defaultMemory = 2048
@@ -23,7 +24,7 @@ class Server {
 
     private serverConfig!: Promise<Maybe<Result<SMAServerConfig>>>
     binder: docker.Binder
-    filename = 'package.json'
+    filename!: string
     serverType!: ServerType
 
     constructor() {
@@ -46,6 +47,16 @@ class Server {
         } else {
             console.log(`Bind node_modules: ${conf.value.node_modules}`)
             return new Result(conf.value.node_modules)
+        }
+    }
+
+    async getTestMode() {
+        const conf = await this.getServerConfig()
+        if (conf.isNothing) {
+            return false
+        } else {
+            const testMode = conf.value.testMode === true
+            return testMode
         }
     }
 
@@ -281,13 +292,25 @@ class Server {
         }
     }
 
+    private checkForConfigFile(filename: string) {
+        const cwd = process.cwd()
+        const pkgPath = path.join(cwd, filename)
+        if (!fs.existsSync(pkgPath)) {
+            return undefined
+        } else {
+            return pkgPath
+        }
+    }
+
     private async getServerConfig() {
         if (this.serverConfig) {
             return this.serverConfig
         }
-        const cwd = process.cwd()
-        const pkgPath = path.join(cwd, this.filename)
-        if (!fs.existsSync(pkgPath)) {
+        const pkgPath = this.filename
+            ? this.checkForConfigFile(this.filename)
+            : this.checkForConfigFile('smac.json') ||
+              this.checkForConfigFile('package.json')
+        if (!pkgPath) {
             this.serverConfig = Promise.resolve(new Nothing())
             return new Nothing()
         }
@@ -296,6 +319,7 @@ class Server {
             this.serverConfig = Promise.resolve(new Nothing())
             return new Nothing()
         }
+        console.log(`Loading settings from ${pkgPath}`)
         this.serverConfig = Promise.resolve(
             new Result<SMAServerConfig>(md.smaServerConfig)
         )
@@ -314,27 +338,3 @@ class Server {
 }
 
 export const server = new Server()
-
-export interface SMAServerConfig {
-    dockerTag: string // default: 'latest'
-    serverType: ServerType // default: 'bukkit'
-    port: string // default: 25565
-    serverName: string
-    worlds: WorldDefinition[]
-    javaPlugins: string[]
-    bind: { src: string; dst: string }[]
-    memory: number
-    restEndpoint: RestConfig
-    node_modules: boolean
-}
-
-export interface RestConfig {
-    port: number
-    password: string
-}
-
-export interface WorldDefinition {
-    version: string
-    name: string
-    downloadUrl: string
-}

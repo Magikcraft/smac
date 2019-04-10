@@ -3,7 +3,7 @@ import { Nothing, Result } from 'ghetto-monad'
 import generateName from 'sillyname'
 import { downloadZipFile } from './download'
 import { localWorldPath, smaWorldPath } from './paths'
-import { WorldDefinition } from './server'
+import { WorldDefinition } from './SMAServerConfig'
 
 export class World {
     worldSpec: WorldDefinition

@@ -25,7 +25,8 @@ function getContainerList() {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield docker.command('ps');
         return data.containerList
-            .filter(c => c.image.indexOf('magikcraft/scriptcraft') === 0)
+            .filter(c => c.image.indexOf('magikcraft/scriptcraft') === 0 ||
+            c.image.indexOf('magikcraft/nukkitcraft') === 0)
             .map(c => ({ name: c.names, status: c.status }));
     });
 }

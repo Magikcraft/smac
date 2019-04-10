@@ -9,7 +9,7 @@ import requestProgress from 'request-progress'
 import rmrf from 'rimraf'
 import url from 'url'
 import util from 'util'
-import { WorldDefinition } from './server'
+import { WorldDefinition } from './SMAServerConfig'
 
 const gitHubIssuesUrl = 'https://github.com/Magikcraft/scriptcraft-sma/issues'
 

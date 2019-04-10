@@ -5,7 +5,11 @@ import { header } from '../lib/util/version'
 export async function getContainerList() {
     const data = await docker.command('ps')
     return data.containerList
-        .filter(c => c.image.indexOf('magikcraft/scriptcraft') === 0)
+        .filter(
+            c =>
+                c.image.indexOf('magikcraft/scriptcraft') === 0 ||
+                c.image.indexOf('magikcraft/nukkitcraft') === 0
+        )
         .map(c => ({ name: c.names, status: c.status }))
 }
 
