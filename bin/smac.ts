@@ -45,7 +45,7 @@ if (mainOptions.command === commandMap.start.name) {
 }
 export function processCommand(command: string, target?: string) {
     if (command === commandMap.stop.name) {
-        commands.stopServer()
+        commands.stopServer(process.argv[3])
     }
     if (command === commandMap.status.name) {
         commands.getStatus()

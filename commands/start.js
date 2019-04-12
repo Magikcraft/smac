@@ -37,7 +37,7 @@ function startServer(options) {
         }
         else {
             console.log(options);
-            const filename = options.file || 'package.json';
+            const filename = options.file;
             server_1.server.filename = filename;
             const name = yield name_1.getTargetForCommand({
                 includeRunningContainer: false,

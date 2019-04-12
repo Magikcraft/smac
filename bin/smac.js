@@ -48,7 +48,7 @@ else {
 }
 function processCommand(command, target) {
     if (command === commandMap_1.commandMap.stop.name) {
-        commands.stopServer();
+        commands.stopServer(process.argv[3]);
     }
     if (command === commandMap_1.commandMap.status.name) {
         commands.getStatus();

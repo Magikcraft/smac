@@ -16,7 +16,7 @@ export async function startServer(options: any) {
         target = options.profile
     } else {
         console.log(options)
-        const filename = options.file || 'package.json'
+        const filename = options.file
         server.filename = filename
         const name = await getTargetForCommand({
             includeRunningContainer: false,
