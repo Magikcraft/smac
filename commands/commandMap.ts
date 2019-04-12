@@ -31,8 +31,20 @@ export const commandMap = {
     stop: {
         description: 'Stop a server',
         name: 'stop',
+        stopDefinitions: [
+            {
+                name: 'file',
+                alias: 'f',
+                description: 'JSON definition file to use',
+                type: String,
+            },
+            {
+                name: 'profile',
+                type: String,
+                defaultOption: true,
+            },
+        ],
     },
-
     status: {
         description: 'Get the status of a server',
         name: 'status',

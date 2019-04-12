@@ -60,6 +60,15 @@ class Server {
         }
     }
 
+    async getName() {
+        const conf = await this.getServerConfig()
+        if (conf.isNothing) {
+            return undefined
+        } else {
+            return conf.value.serverName
+        }
+    }
+
     createNodeModuleBindings() {
         const modules = fs.readdirSync('node_modules')
         const nsPackage = m => {

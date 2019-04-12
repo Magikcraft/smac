@@ -35,6 +35,11 @@ if (mainOptions.command === commandMap.start.name) {
     // console.log('\nstartOptions\n============')
     // console.log(startOptions)
     commands.startServer(startOptions)
+} else if (mainOptions.command === commandMap.stop.name) {
+    const stopDefinitions = commandMap.stop.stopDefinitions
+    const stopOptions = commandLineArgs(stopDefinitions, { argv })
+    console.log(stopOptions)
+    commands.stopServer(stopOptions)
 } else {
     const command = process.argv[2]
 
@@ -45,7 +50,7 @@ if (mainOptions.command === commandMap.start.name) {
 }
 export function processCommand(command: string, target?: string) {
     if (command === commandMap.stop.name) {
-        commands.stopServer(process.argv[3])
+        commands.stopServer(target || process.argv[3])
     }
     if (command === commandMap.status.name) {
         commands.getStatus()

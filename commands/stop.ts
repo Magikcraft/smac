@@ -1,12 +1,16 @@
 import * as docker from '../lib/docker'
+import { server } from '../lib/server'
 import { exit } from '../lib/util/exit'
 import { getTargetForCommand, hintRunningContainers } from '../lib/util/name'
 import { getContainerStatus } from './status'
 
-export async function stopServer(serverTarget?: string) {
+export async function stopServer(options?: any) {
     let target
-    if (serverTarget) {
-        target = serverTarget
+    if (options.file) {
+        server.filename = options.file
+        target = await server.getName()
+    } else if (options.profile) {
+        target = options.profile
     } else {
         const name = await getTargetForCommand()
         if (name.isNothing) {

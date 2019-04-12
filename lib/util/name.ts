@@ -19,6 +19,7 @@ export async function hintRunningContainers() {
         console.log('There are no running servers.')
     }
 }
+
 export async function getTargetForCommand({
     includeRunningContainer = true,
     options = {} as any,

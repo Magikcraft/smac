@@ -37,6 +37,12 @@ if (mainOptions.command === commandMap_1.commandMap.start.name) {
     // console.log(startOptions)
     commands.startServer(startOptions);
 }
+else if (mainOptions.command === commandMap_1.commandMap.stop.name) {
+    const stopDefinitions = commandMap_1.commandMap.stop.stopDefinitions;
+    const stopOptions = commandLineArgs(stopDefinitions, { argv });
+    console.log(stopOptions);
+    commands.stopServer(stopOptions);
+}
 else {
     const command = process.argv[2];
     if (!command || !commandMap_1.commandMap[command]) {
@@ -48,7 +54,7 @@ else {
 }
 function processCommand(command, target) {
     if (command === commandMap_1.commandMap.stop.name) {
-        commands.stopServer(process.argv[3]);
+        commands.stopServer(target || process.argv[3]);
     }
     if (command === commandMap_1.commandMap.status.name) {
         commands.getStatus();

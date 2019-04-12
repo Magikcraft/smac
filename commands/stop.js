@@ -16,14 +16,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const docker = __importStar(require("../lib/docker"));
+const server_1 = require("../lib/server");
 const exit_1 = require("../lib/util/exit");
 const name_1 = require("../lib/util/name");
 const status_1 = require("./status");
-function stopServer(serverTarget) {
+function stopServer(options) {
     return __awaiter(this, void 0, void 0, function* () {
         let target;
-        if (serverTarget) {
-            target = serverTarget;
+        if (options.file) {
+            server_1.server.filename = options.file;
+            target = yield server_1.server.getName();
+        }
+        else if (options.profile) {
+            target = options.profile;
         }
         else {
             const name = yield name_1.getTargetForCommand();
