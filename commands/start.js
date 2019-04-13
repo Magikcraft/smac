@@ -109,7 +109,7 @@ function startNewInstance(name, options) {
             containerPort += '/udp';
         }
         try {
-            const dc = `run -d -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always ${dockerImage}:${tag}`;
+            const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always  ${dockerImage}:${tag}`;
             yield docker.command(dc);
             console.log(chalk_1.default.yellow(`Server ${name} started on localhost:${port}\n`));
             logOutCommand(dc);

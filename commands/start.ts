@@ -95,9 +95,9 @@ async function startNewInstance(name: string, options: any) {
         containerPort += '/udp'
     }
     try {
-        const dc = `run -d -p ${port}:${containerPort} -p ${rest.port}:${
+        const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${
             rest.port
-        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always ${dockerImage}:${tag}`
+        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always  ${dockerImage}:${tag}`
         await docker.command(dc)
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)
