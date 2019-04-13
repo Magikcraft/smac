@@ -9,6 +9,8 @@ import { CustomStd } from './stdout'
 import { exit } from './util/exit'
 import { CommandPrompt } from './util/inquirer-command-prompt'
 
+let tsMode = false
+
 const tss = new TypeScriptSimple(
     {
         module: ts.ModuleKind.CommonJS,
@@ -44,9 +46,18 @@ async function inquire(serverTarget, started) {
         {
             type: 'command',
             name: 'cmd',
-            message: '>',
+            message: tsMode ? 'TS >' : '>',
             // optional
-            autoCompletion: ['js ', 'ts ', 'smac', 'mv', 'help', 'smac stop'],
+            autoCompletion: [
+                'js ',
+                'ts ',
+                'ts on',
+                'ts off',
+                'smac',
+                'mv',
+                'help',
+                'smac stop',
+            ],
             context: 0,
             short: false,
             default: previousLine,
@@ -54,23 +65,37 @@ async function inquire(serverTarget, started) {
     ] as any)
     if (answers && answers.cmd) {
         const command = (answers.cmd || '').trimLeft()
-        const isTSCommand = command.indexOf(`ts `) === 0
-        const isSmacCommand =
-            command.indexOf('smac ') === 0 ||
-            (command.indexOf('smac') === 0 && command.length === 4)
-        if (isTSCommand) {
-            sendTSCommand(command.split('ts ')[1])
-        } else if (isSmacCommand) {
-            processCommand(command.split('smac ')[1], serverTarget)
-        } else sendCommand(command)
-        previousLine = command
+        if (command == 'ts on') {
+            tsMode = true
+        } else if (command == 'ts off') {
+            tsMode = false
+        } else {
+            const isTSCommand = tsMode || command.indexOf(`ts `) === 0
+            const isSmacCommand =
+                command.indexOf('smac ') === 0 ||
+                (command.indexOf('smac') === 0 && command.length === 4)
+            if (isTSCommand) {
+                const ts =
+                    command.indexOf(`ts `) === 0
+                        ? command.split('ts ')[1]
+                        : command
+                sendTSCommand(ts)
+            } else if (isSmacCommand) {
+                processCommand(command.split('smac ')[1], serverTarget)
+            } else sendCommand(command)
+            previousLine = command
+        }
     }
 }
 
 async function sendTSCommand(spell: string) {
-    const js = tss.compile(spell)
-    console.log(js)
-    sendCommand(`js ${js}`)
+    try {
+        const js = tss.compile(spell)
+        console.log(js)
+        sendCommand(`js ${js}`)
+    } catch (e) {
+        console.log(e.message)
+    }
 }
 
 async function sendCommand(command: string) {
