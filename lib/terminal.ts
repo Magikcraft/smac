@@ -70,7 +70,9 @@ async function inquire(serverTarget, started) {
         } else if (command == 'ts off') {
             tsMode = false
         } else {
-            const isTSCommand = tsMode || command.indexOf(`ts `) === 0
+            const isTSCommand =
+                (tsMode || command.indexOf(`ts `) === 0) &&
+                command !== 'smac stop'
             const isSmacCommand =
                 command.indexOf('smac ') === 0 ||
                 (command.indexOf('smac') === 0 && command.length === 4)
