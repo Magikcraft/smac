@@ -20,7 +20,7 @@ const server_1 = require("../lib/server");
 const exit_1 = require("../lib/util/exit");
 const name_1 = require("../lib/util/name");
 const status_1 = require("./status");
-function stopServer(options) {
+function stopServer(options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         let target;
         if (options.file) {

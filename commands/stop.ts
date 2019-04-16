@@ -4,7 +4,7 @@ import { exit } from '../lib/util/exit'
 import { getTargetForCommand, hintRunningContainers } from '../lib/util/name'
 import { getContainerStatus } from './status'
 
-export async function stopServer(options?: any) {
+export async function stopServer(options: any = {}) {
     let target
     if (options.file) {
         server.filename = options.file
