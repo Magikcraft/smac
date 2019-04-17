@@ -33,8 +33,11 @@ export async function startServer(options: any) {
     // @TODO
     // installJSPluginsIfNeeded()
     // installJavaPluginsIfNeeded()
+    console.log({ target }) // @DEBUG
     const data = await getContainerStatus(target)
     if (!data.isError) {
+        console.log(data.value) // @DEBUG
+
         if (data.value.State.Status === 'running') {
             console.log(`${target} is already running.`)
             return exit()
@@ -89,6 +92,7 @@ async function startNewInstance(name: string, options: any) {
     const testMode =
         options.test || (await server.getTestMode()) ? `-e TEST_MODE=true` : ''
     const dockerImage = await server.getDockerImage()
+    const requireDebug = options.verbose ? '-e DEBUG_REQUIRE=true' : ''
 
     console.log(`Starting ${serverType} server on port ${port}...`)
     if (serverType === 'nukkit') {
@@ -97,7 +101,7 @@ async function startNewInstance(name: string, options: any) {
     try {
         const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${
             rest.port
-        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always  ${dockerImage}:${tag}`
+        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`
         await docker.command(dc)
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)

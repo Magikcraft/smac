@@ -52,8 +52,10 @@ function startServer(options) {
         // @TODO
         // installJSPluginsIfNeeded()
         // installJavaPluginsIfNeeded()
+        console.log({ target }); // @DEBUG
         const data = yield status_1.getContainerStatus(target);
         if (!data.isError) {
+            console.log(data.value); // @DEBUG
             if (data.value.State.Status === 'running') {
                 console.log(`${target} is already running.`);
                 return exit_1.exit();
@@ -104,12 +106,13 @@ function startNewInstance(name, options) {
         const eula = `-e MINECRAFT_EULA_ACCEPTED=${eulaAccepted}`;
         const testMode = options.test || (yield server_1.server.getTestMode()) ? `-e TEST_MODE=true` : '';
         const dockerImage = yield server_1.server.getDockerImage();
+        const requireDebug = options.verbose ? '-e DEBUG_REQUIRE=true' : '';
         console.log(`Starting ${serverType} server on port ${port}...`);
         if (serverType === 'nukkit') {
             containerPort += '/udp';
         }
         try {
-            const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} --restart always  ${dockerImage}:${tag}`;
+            const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`;
             yield docker.command(dc);
             console.log(chalk_1.default.yellow(`Server ${name} started on localhost:${port}\n`));
             logOutCommand(dc);

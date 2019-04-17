@@ -69,30 +69,46 @@ class Server {
         }
     }
 
+    // @TODO Bind node_modules directly
     createNodeModuleBindings() {
         const modules = fs.readdirSync('node_modules')
-        const nsPackage = m => {
-            const isNamespacedPackage = m && m.indexOf('@') === 0
-            if (isNamespacedPackage) {
-                const pkgs = fs.readdirSync(`node_modules/${m}`)
-                return pkgs
-                    .map(p =>
-                        this.binder.makeMount(
-                            localPath(`node_modules/${m}/${p}`),
-                            `scriptcraft-plugins/${m}/${p}`
-                        )
-                    )
-                    .join(' ')
-            }
-            return this.binder.makeMount(
-                localPath(`node_modules/${m}`),
-                `scriptcraft-plugins/${m}`
+        if (!modules) {
+            console.log(
+                chalk.yellow(
+                    'WARNING: node_modules directory not found, and it was specified in the bindings. Do you need to run '
+                ) +
+                    chalk.magenta('npm i') +
+                    chalk.yellow('?')
             )
+            console.log('Skipping node_modules binding')
+            return ''
         }
-        if (modules.length > 0) {
-            return modules.map(nsPackage).join(' ')
-        }
-        return ''
+        return this.binder.makeMount(
+            localPath(`node_modules`),
+            `scriptcraft-plugins/node_modules`
+        )
+        // const nsPackage = m => {
+        //     const isNamespacedPackage = m && m.indexOf('@') === 0
+        //     if (isNamespacedPackage) {
+        //         const pkgs = fs.readdirSync(`node_modules/${m}`)
+        //         return pkgs
+        //             .map(p =>
+        //                 this.binder.makeMount(
+        //                     localPath(`node_modules/${m}/${p}`),
+        //                     `scriptcraft-plugins/${m}/${p}`
+        //                 )
+        //             )
+        //             .join(' ')
+        //     }
+        //     return this.binder.makeMount(
+        //         localPath(`node_modules/${m}`),
+        //         `scriptcraft-plugins/${m}`
+        //     )
+        // }
+        // if (modules.length > 0) {
+        //     return modules.map(nsPackage).join(' ')
+        // }
+        // return ''
     }
 
     async getBindings(name) {

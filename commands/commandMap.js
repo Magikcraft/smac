@@ -27,6 +27,12 @@ exports.commandMap = {
                 description: 'JSON definition file to use',
                 type: String,
             },
+            {
+                name: 'verbose',
+                alias: 'v',
+                description: 'Verbose require debugging',
+                type: Boolean,
+            },
         ],
     },
     stop: {
