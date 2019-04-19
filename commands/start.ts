@@ -33,11 +33,8 @@ export async function startServer(options: any) {
     // @TODO
     // installJSPluginsIfNeeded()
     // installJavaPluginsIfNeeded()
-    console.log({ target }) // @DEBUG
     const data = await getContainerStatus(target)
     if (!data.isError) {
-        console.log(data.value) // @DEBUG
-
         if (data.value.State.Status === 'running') {
             console.log(`${target} is already running.`)
             return exit()

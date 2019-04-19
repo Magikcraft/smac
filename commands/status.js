@@ -19,13 +19,18 @@ const ghetto_monad_1 = require("ghetto-monad");
 const docker = __importStar(require("../lib/docker"));
 const exit_1 = require("../lib/util/exit");
 const name_1 = require("../lib/util/name");
+const list_1 = require("./list");
 function getContainerStatus(name) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield docker.command(`inspect ${name}`);
-            return new ghetto_monad_1.Result(Object.assign({ State: data.object[0].State, Mounts: data.object[0].Mounts }, data.object[0].NetworkSettings.Ports));
+            return new ghetto_monad_1.Result(Object.assign({ Name: name, State: data.object[0].State, Mounts: data.object[0].Mounts }, data.object[0].NetworkSettings.Ports));
         }
         catch (e) {
+            const running = yield list_1.getContainerList();
+            if (running.length === 1) {
+                return getContainerStatus(running[0].name);
+            }
             return new ghetto_monad_1.ErrorResult(new Error(`Server ${name} is not running`));
         }
     });
@@ -39,7 +44,6 @@ function getStatus() {
             return exit_1.exit;
         }
         const isUp = name_1.isRunning(name.value);
-        console.log(name);
         if (!isUp) {
             console.log(`Server ${name.value} is not running`);
             yield name_1.hintRunningContainers();

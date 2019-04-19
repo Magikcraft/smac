@@ -52,10 +52,8 @@ function startServer(options) {
         // @TODO
         // installJSPluginsIfNeeded()
         // installJavaPluginsIfNeeded()
-        console.log({ target }); // @DEBUG
         const data = yield status_1.getContainerStatus(target);
         if (!data.isError) {
-            console.log(data.value); // @DEBUG
             if (data.value.State.Status === 'running') {
                 console.log(`${target} is already running.`);
                 return exit_1.exit();

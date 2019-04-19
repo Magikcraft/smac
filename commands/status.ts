@@ -6,16 +6,22 @@ import {
     hintRunningContainers,
     isRunning,
 } from '../lib/util/name'
+import { getContainerList } from './list'
 
 export async function getContainerStatus(name: string) {
     try {
         const data = await docker.command(`inspect ${name}`)
         return new Result({
+            Name: name,
             State: data.object[0].State,
             Mounts: data.object[0].Mounts,
             ...data.object[0].NetworkSettings.Ports,
         })
     } catch (e) {
+        const running = await getContainerList()
+        if (running.length === 1) {
+            return getContainerStatus(running[0].name)
+        }
         return new ErrorResult(new Error(`Server ${name} is not running`))
     }
 }
@@ -27,7 +33,6 @@ export async function getStatus() {
         return exit
     }
     const isUp = isRunning(name.value)
-    console.log(name)
     if (!isUp) {
         console.log(`Server ${name.value} is not running`)
         await hintRunningContainers()
