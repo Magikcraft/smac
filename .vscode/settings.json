@@ -1,8 +1,21 @@
 {
     "workbench.colorCustomizations": {
-        "activityBar.background": "#053521",
-        "titleBar.activeBackground": "#074A2E",
-        "titleBar.activeForeground": "#EFFEF8"
+        "activityBar.background": "#083221",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#9123dc",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "titleBar.activeBackground": "#010604",
+        "titleBar.inactiveBackground": "#01060499",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "statusBar.background": "#010604",
+        "statusBarItem.hoverBackground": "#083221",
+        "statusBar.foreground": "#e7e7e7",
+        "activityBar.activeBackground": "#083221",
+        "activityBar.activeBorder": "#9123dc",
+        "statusBar.border": "#010604",
+        "titleBar.border": "#010604"
     },
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
@@ -18,5 +31,6 @@
         "**/.project": true,
         "**/.settings": true,
         "**/.factorypath": true
-    }
+    },
+    "peacock.color": "#010604"
 }

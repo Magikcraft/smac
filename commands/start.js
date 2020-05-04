@@ -109,8 +109,9 @@ function startNewInstance(name, options) {
         if (serverType === 'nukkit') {
             containerPort += '/udp';
         }
+        const logging = '--log-opts max-size=2m --logopts max-file=10';
         try {
-            const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`;
+            const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${logging} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`;
             yield docker.command(dc);
             console.log(chalk_1.default.yellow(`Server ${name} started on localhost:${port}\n`));
             logOutCommand(dc);

@@ -95,10 +95,11 @@ async function startNewInstance(name: string, options: any) {
     if (serverType === 'nukkit') {
         containerPort += '/udp'
     }
+    const logging = '--log-opts max-size=2m --logopts max-file=10'
     try {
         const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${
             rest.port
-        } --name ${name} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`
+        } --name ${name} ${logging} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`
         await docker.command(dc)
         console.log(
             chalk.yellow(`Server ${name} started on localhost:${port}\n`)
