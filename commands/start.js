@@ -109,7 +109,7 @@ function startNewInstance(name, options) {
         if (serverType === 'nukkit') {
             containerPort += '/udp';
         }
-        const logging = '--log-opt max-size=2m --logopt max-file=10';
+        const logging = '--log-opt max-size=2m --log-opt max-file=10';
         try {
             const dc = `run -d -t -p ${port}:${containerPort} -p ${rest.port}:${rest.port} --name ${name} ${logging} ${env} ${eula} ${bind} ${cache} ${testMode} ${requireDebug} --restart always  ${dockerImage}:${tag}`;
             yield docker.command(dc);
