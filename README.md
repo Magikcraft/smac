@@ -2,6 +2,10 @@
 
 Manages dockerised Minecraft servers for developing and deploying Javascript Minecraft plugins written using [Scriptcraft](https://github.com/walterhiggins/ScriptCraft) and the [Scriptcraft Modular Architecture](https://github.com/Magikcraft/scriptcraft-modular-arch).
 
+## Note for users on Windows
+
+See this [issue comment](https://github.com/Magikcraft/smac/issues/7#issuecomment-785122292) to enable this to work on Windows.
+
 ## Install
 
 ```bash
